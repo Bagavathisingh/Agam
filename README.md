@@ -162,7 +162,7 @@ agam
 
 ### Using Prebuilt Binary (Recommended)
 
-> 🚧 **Coming Soon**
+> [ALL DOWNLOAD LINKS INCLUDED HERE](https://github.com/Aruvili/Agam/releases)
 
 Prebuilt binaries for **Windows, macOS, and Linux** will be available after the first GitHub release.
 
