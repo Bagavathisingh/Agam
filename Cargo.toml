@@ -13,6 +13,8 @@ categories = ["compilers", "development-tools"]
 unicode-segmentation = "1.10"
 rustyline = "12.0"
 thiserror = "1.0"
+
+[build-dependencies]
 winres = "0.1"
 
 [profile.release]
