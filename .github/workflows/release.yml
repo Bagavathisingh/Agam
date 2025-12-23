@@ -48,6 +48,13 @@ jobs:
       if: matrix.target == 'x86_64-unknown-linux-musl'
       run: sudo apt-get update && sudo apt-get install -y musl-tools
 
+    - name: Install ImageMagick (Windows)
+      if: runner.os == 'Windows'
+      run: |
+        choco install imagemagick -y
+        New-Item -ItemType Directory -Path "assets" -Force | Out-Null
+        magick convert "vscode-extension/images/icon.png" -define icon:auto-resize=256,128,64,48,32,16 "assets/icon.ico"
+
     - name: Build release binary
       run: cargo build --release --target ${{ matrix.target }}
 
