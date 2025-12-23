@@ -17,9 +17,6 @@ jobs:
     - name: Install Rust
       uses: actions-rust-lang/setup-rust-toolchain@v1
 
-    - name: Build release binary
-      run: cargo build --release
-
     - name: Download Inno Setup & ImageMagick
       run: |
         choco install innosetup -y
@@ -29,6 +26,9 @@ jobs:
       run: |
         New-Item -ItemType Directory -Path "assets" -Force | Out-Null
         magick convert "vscode-extension/images/icon.png" -define icon:auto-resize=256,128,64,48,32,16 "assets/icon.ico"
+
+    - name: Build release binary
+      run: cargo build --release
 
     - name: Build Windows installer
       run: |
