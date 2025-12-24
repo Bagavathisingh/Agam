@@ -46,6 +46,8 @@ impl Parser {
             self.enum_declaration()
         } else if self.check(&TokenType::Irakkumadhi) {
             self.import_statement()
+        } else if self.check(&TokenType::Irundhu) {
+            self.from_import_statement()
         } else {
             self.statement()
         }
@@ -267,6 +269,30 @@ impl Parser {
         })
     }
 
+    // Selective import: இருந்து module இறக்குமதி func1, func2
+    fn from_import_statement(&mut self) -> Result<Statement, AgamError> {
+        self.advance(); // consume இருந்து
+        
+        let module = self.consume_identifier("கூறு பெயர் எதிர்பார்க்கப்படுகிறது")?;
+        
+        self.consume(&TokenType::Irakkumadhi, "'இறக்குமதி' எதிர்பார்க்கப்படுகிறது")?;
+        
+        // Parse list of items to import
+        let mut items = vec![];
+        items.push(self.consume_identifier("இறக்குமதி பொருள் பெயர் எதிர்பார்க்கப்படுகிறது")?);
+        
+        while self.match_token(&[TokenType::Comma]) {
+            items.push(self.consume_identifier("இறக்குமதி பொருள் பெயர் எதிர்பார்க்கப்படுகிறது")?);
+        }
+        
+        self.consume_newline_or_eof()?;
+        
+        Ok(Statement::Import {
+            module,
+            items: Some(items),
+        })
+    }
+
     fn struct_declaration(&mut self) -> Result<Statement, AgamError> {
         self.advance(); // consume கட்டமைப்பு
 
@@ -453,9 +479,28 @@ impl Parser {
         if self.match_token(&[TokenType::Equal]) {
             let value = self.assignment()?;
             
+            // Simple identifier assignment
             if let Expression::Identifier(name) = expr {
                 return Ok(Expression::Assignment {
                     name,
+                    value: Box::new(value),
+                });
+            }
+            
+            // Index assignment: list[0] = value, dict["key"] = value
+            if let Expression::Index { object, index } = expr {
+                return Ok(Expression::IndexAssignment {
+                    object,
+                    index,
+                    value: Box::new(value),
+                });
+            }
+            
+            // Member assignment: struct.field = value
+            if let Expression::MemberAccess { object, member } = expr {
+                return Ok(Expression::MemberAssignment {
+                    object,
+                    member,
                     value: Box::new(value),
                 });
             }

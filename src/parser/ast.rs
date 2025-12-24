@@ -158,6 +158,18 @@ pub enum Expression {
         name: String,
         arguments: Vec<Expression>,
     },
+    /// Index assignment: list[0] = value, dict["key"] = value
+    IndexAssignment {
+        object: Box<Expression>,
+        index: Box<Expression>,
+        value: Box<Expression>,
+    },
+    /// Member assignment: struct.field = value
+    MemberAssignment {
+        object: Box<Expression>,
+        member: String,
+        value: Box<Expression>,
+    },
 }
 
 /// Binary operators

@@ -131,6 +131,34 @@ Remove and return the last item from a list:
 அச்சிடு(numbers)   # Output: [1, 2, 3, 4]
 ```
 
+### வரிசை / sort
+
+Sort a list in ascending order:
+
+```
+மாறி numbers = [3, 1, 4, 1, 5, 9, 2, 6]
+மாறி sorted = வரிசை(numbers)
+அச்சிடு(sorted)   # Output: [1, 1, 2, 3, 4, 5, 6, 9]
+
+# Also works with strings
+மாறி names = ["சரவணன்", "அருண்", "குமார்"]
+அச்சிடு(வரிசை(names))
+```
+
+### தலைகீழ் / reverse
+
+Reverse a list or string:
+
+```
+# Reverse a list
+மாறி numbers = [1, 2, 3, 4, 5]
+அச்சிடு(தலைகீழ்(numbers))   # Output: [5, 4, 3, 2, 1]
+
+# Reverse a string
+மாறி text = "தமிழ்"
+அச்சிடு(தலைகீழ்(text))     # Output: ழ்மித
+```
+
 ---
 
 ## Information Functions
@@ -150,20 +178,352 @@ Get the type of a value:
 
 ---
 
+## Math Functions
+
+### வர்க்கம் / sqrt
+
+Calculate the square root of a number:
+
+```
+அச்சிடு(வர்க்கம்(16))     # Output: 4
+அச்சிடு(வர்க்கம்(2))      # Output: 1.4142135623730951
+அச்சிடு(வர்க்கம்(100))    # Output: 10
+```
+
+### அடி / pow
+
+Raise a number to a power:
+
+```
+அச்சிடு(அடி(2, 3))        # Output: 8 (2³)
+அச்சிடு(அடி(10, 2))       # Output: 100 (10²)
+அச்சிடு(அடி(5, 0))        # Output: 1 (any number to power 0)
+```
+
+### தளம் / floor
+
+Round down to the nearest integer:
+
+```
+அச்சிடு(தளம்(3.7))        # Output: 3
+அச்சிடு(தளம்(3.2))        # Output: 3
+அச்சிடு(தளம்(-2.5))       # Output: -3
+```
+
+### கூரை / ceil
+
+Round up to the nearest integer:
+
+```
+அச்சிடு(கூரை(3.2))        # Output: 4
+அச்சிடு(கூரை(3.7))        # Output: 4
+அச்சிடு(கூரை(-2.5))       # Output: -2
+```
+
+### முழுமை / abs
+
+Get the absolute value of a number:
+
+```
+அச்சிடு(முழுமை(-5))       # Output: 5
+அச்சிடு(முழுமை(10))       # Output: 10
+அச்சிடு(முழுமை(-3.14))    # Output: 3.14
+```
+
+### குறைந்தபட்சம் / min
+
+Find the minimum value:
+
+```
+# Multiple arguments
+அச்சிடு(குறைந்தபட்சம்(5, 3, 8, 1))    # Output: 1
+
+# From a list
+மாறி numbers = [10, 5, 20, 3, 15]
+அச்சிடு(குறைந்தபட்சம்(numbers))        # Output: 3
+```
+
+### அதிகபட்சம் / max
+
+Find the maximum value:
+
+```
+# Multiple arguments
+அச்சிடு(அதிகபட்சம்(5, 3, 8, 1))       # Output: 8
+
+# From a list
+மாறி numbers = [10, 5, 20, 3, 15]
+அச்சிடு(அதிகபட்சம்(numbers))           # Output: 20
+```
+
+### கூட்டு / sum
+
+Calculate the sum of a list:
+
+```
+மாறி numbers = [1, 2, 3, 4, 5]
+அச்சிடு(கூட்டு(numbers))    # Output: 15
+
+மாறி prices = [99.99, 50.00, 25.50]
+அச்சிடு(கூட்டு(prices))     # Output: 175.49
+```
+
+### தற்செயல் / random
+
+Generate random numbers:
+
+```
+# Random decimal between 0 and 1
+மாறி r = தற்செயல்()
+அச்சிடு(r)                 # Output: 0.xxx (random)
+
+# Random integer from 0 to max-1
+மாறி dice = தற்செயல்(6)
+அச்சிடு(dice)              # Output: 0-5
+
+# Random integer in range
+மாறி num = தற்செயல்(1, 100)
+அச்சிடு(num)               # Output: 1-99
+```
+
+---
+
+## String Functions
+
+### பிரி / split
+
+Split a string into a list:
+
+```
+மாறி sentence = "Hello World Tamil"
+மாறி words = பிரி(sentence, " ")
+அச்சிடு(words)             # Output: [Hello, World, Tamil]
+
+மாறி csv = "apple,banana,cherry"
+மாறி items = பிரி(csv, ",")
+அச்சிடு(items)             # Output: [apple, banana, cherry]
+```
+
+### இணை / join
+
+Join a list into a string:
+
+```
+மாறி words = ["Hello", "World", "Tamil"]
+மாறி sentence = இணை(" ", words)
+அச்சிடு(sentence)          # Output: Hello World Tamil
+
+மாறி items = ["a", "b", "c"]
+அச்சிடு(இணை("-", items))   # Output: a-b-c
+```
+
+### மேல் / upper
+
+Convert string to uppercase:
+
+```
+மாறி text = "hello world"
+அச்சிடு(மேல்(text))        # Output: HELLO WORLD
+```
+
+### கீழ் / lower
+
+Convert string to lowercase:
+
+```
+மாறி text = "HELLO WORLD"
+அச்சிடு(கீழ்(text))        # Output: hello world
+```
+
+### ஒழுங்கு / trim
+
+Remove whitespace from both ends:
+
+```
+மாறி text = "   Hello World   "
+அச்சிடு(ஒழுங்கு(text))     # Output: Hello World
+```
+
+### மாற்று / replace
+
+Replace occurrences in a string:
+
+```
+மாறி text = "Hello World"
+அச்சிடு(மாற்று(text, "World", "Tamil"))
+# Output: Hello Tamil
+
+மாறி phone = "123-456-7890"
+அச்சிடு(மாற்று(phone, "-", ""))
+# Output: 1234567890
+```
+
+### தொடங்கு / startswith
+
+Check if string starts with a prefix:
+
+```
+மாறி text = "Hello World"
+அச்சிடு(தொடங்கு(text, "Hello"))    # Output: உண்மை
+அச்சிடு(தொடங்கு(text, "World"))    # Output: பொய்
+```
+
+### முடிவு / endswith
+
+Check if string ends with a suffix:
+
+```
+மாறி file = "document.pdf"
+அச்சிடு(முடிவு(file, ".pdf"))      # Output: உண்மை
+அச்சிடு(முடிவு(file, ".txt"))      # Output: பொய்
+```
+
+### உள்ளதா / contains
+
+Check if a string or list contains a value:
+
+```
+# String contains
+மாறி text = "Hello World"
+அச்சிடு(உள்ளதா(text, "World"))     # Output: உண்மை
+அச்சிடு(உள்ளதா(text, "Tamil"))     # Output: பொய்
+
+# List contains
+மாறி fruits = ["apple", "banana", "cherry"]
+அச்சிடு(உள்ளதா(fruits, "banana"))  # Output: உண்மை
+```
+
+---
+
+## File I/O Functions
+
+### படி / read_file
+
+Read contents of a file:
+
+```
+மாறி content = படி("data.txt")
+அச்சிடு(content)
+
+# Read and process line by line
+மாறி lines = பிரி(படி("data.txt"), "\n")
+ஒவ்வொரு line உள்ள lines:
+    அச்சிடு(line)
+```
+
+### எழுது / write_file
+
+Write content to a file:
+
+```
+மாறி content = "வணக்கம் உலகம்!"
+எழுது("output.txt", content)
+
+# Write multiple lines
+மாறி lines = ["Line 1", "Line 2", "Line 3"]
+எழுது("output.txt", இணை("\n", lines))
+```
+
+### உள்ளது / file_exists
+
+Check if a file exists:
+
+```
+என்றால் உள்ளது("config.txt"):
+    மாறி config = படி("config.txt")
+    அச்சிடு("Config loaded!")
+இல்லை:
+    அச்சிடு("Config file not found!")
+```
+
+---
+
+## System Functions
+
+### வெளியேறு / exit
+
+Exit the program:
+
+```
+அச்சிடு("Goodbye!")
+வெளியேறு()           # Exit with code 0
+
+# Exit with error code
+வெளியேறு(1)          # Exit with code 1
+```
+
+---
+
 ## Quick Reference Table
+
+### I/O Functions
 
 | Tamil | English | Purpose | Example |
 |-------|---------|---------|---------|
 | `அச்சிடு` | `print` | Display output | `அச்சிடு("Hi")` |
 | `உள்ளீடு` | `input` | Read input | `உள்ளீடு("Name: ")` |
-| `நீளம்` | `len` | Get length | `நீளம்("Hello")` → 5 |
-| `வகை` | `type` | Get type | `வகை(42)` → எண் |
+
+### Type Conversion
+
+| Tamil | English | Purpose | Example |
+|-------|---------|---------|---------|
 | `எண்ணாக` | `int` | To integer | `எண்ணாக("42")` → 42 |
 | `தசமாக` | `float` | To decimal | `தசமாக("3.14")` → 3.14 |
 | `சரமாக` | `str` | To string | `சரமாக(42)` → "42" |
+| `வகை` | `type` | Get type | `வகை(42)` → எண் |
+
+### Collection Functions
+
+| Tamil | English | Purpose | Example |
+|-------|---------|---------|---------|
+| `நீளம்` | `len` | Get length | `நீளம்("Hello")` → 5 |
 | `வரம்பு` | `range` | Number sequence | `வரம்பு(1, 5)` |
 | `சேர்` | `append` | Add to list | `சேர்(list, item)` |
 | `நீக்கு` | `pop` | Remove from list | `நீக்கு(list)` |
+| `வரிசை` | `sort` | Sort list | `வரிசை([3,1,2])` → [1,2,3] |
+| `தலைகீழ்` | `reverse` | Reverse list/string | `தலைகீழ்([1,2,3])` → [3,2,1] |
+
+### Math Functions
+
+| Tamil | English | Purpose | Example |
+|-------|---------|---------|---------|
+| `வர்க்கம்` | `sqrt` | Square root | `வர்க்கம்(16)` → 4 |
+| `அடி` | `pow` | Power | `அடி(2, 3)` → 8 |
+| `தளம்` | `floor` | Round down | `தளம்(3.7)` → 3 |
+| `கூரை` | `ceil` | Round up | `கூரை(3.2)` → 4 |
+| `முழுமை` | `abs` | Absolute value | `முழுமை(-5)` → 5 |
+| `குறைந்தபட்சம்` | `min` | Minimum | `குறைந்தபட்சம்(3, 1, 4)` → 1 |
+| `அதிகபட்சம்` | `max` | Maximum | `அதிகபட்சம்(3, 1, 4)` → 4 |
+| `கூட்டு` | `sum` | Sum of list | `கூட்டு([1,2,3])` → 6 |
+| `தற்செயல்` | `random` | Random number | `தற்செயல்()` → 0.xxx |
+
+### String Functions
+
+| Tamil | English | Purpose | Example |
+|-------|---------|---------|---------|
+| `பிரி` | `split` | Split string | `பிரி("a,b", ",")` → [a, b] |
+| `இணை` | `join` | Join list | `இணை("-", [a,b])` → "a-b" |
+| `மேல்` | `upper` | Uppercase | `மேல்("hi")` → "HI" |
+| `கீழ்` | `lower` | Lowercase | `கீழ்("HI")` → "hi" |
+| `ஒழுங்கு` | `trim` | Trim whitespace | `ஒழுங்கு(" hi ")` → "hi" |
+| `மாற்று` | `replace` | Replace text | `மாற்று("ab", "a", "x")` → "xb" |
+| `தொடங்கு` | `startswith` | Starts with | `தொடங்கு("hi", "h")` → உண்மை |
+| `முடிவு` | `endswith` | Ends with | `முடிவு("hi", "i")` → உண்மை |
+| `உள்ளதா` | `contains` | Contains | `உள்ளதா("hi", "i")` → உண்மை |
+
+### File I/O Functions
+
+| Tamil | English | Purpose | Example |
+|-------|---------|---------|---------|
+| `படி` | `read_file` | Read file | `படி("file.txt")` |
+| `எழுது` | `write_file` | Write file | `எழுது("file.txt", "data")` |
+| `உள்ளது` | `file_exists` | File exists | `உள்ளது("file.txt")` → உண்மை/பொய் |
+
+### System Functions
+
+| Tamil | English | Purpose | Example |
+|-------|---------|---------|---------|
+| `வெளியேறு` | `exit` | Exit program | `வெளியேறு(0)` |
 
 ---
 
@@ -190,17 +550,8 @@ calculator()
 
 ```
 செயல் count_words(text):
-    மாறி words = 0
-    மாறி in_word = பொய்
-    
-    ஒவ்வொரு char உள்ள text:
-        என்றால் char == " ":
-            in_word = பொய்
-        இல்லையென்றால் இல்ல in_word:
-            words = words + 1
-            in_word = உண்மை
-    
-    திரும்பு words
+    மாறி words = பிரி(text, " ")
+    திரும்பு நீளம்(words)
 
 மாறி sentence = "Hello World from agam"
 அச்சிடு("Words:", count_words(sentence))
@@ -211,26 +562,26 @@ calculator()
 
 ```
 செயல் statistics(numbers):
-    மாறி total = 0
-    மாறி min_val = numbers[0]
-    மாறி max_val = numbers[0]
-    
-    ஒவ்வொரு num உள்ள numbers:
-        total = total + num
-        என்றால் num < min_val:
-            min_val = num
-        என்றால் num > max_val:
-            max_val = num
-    
-    மாறி avg = total / நீளம்(numbers)
-    
     அச்சிடு("Count:", நீளம்(numbers))
-    அச்சிடு("Sum:", total)
-    அச்சிடு("Average:", avg)
-    அச்சிடு("Min:", min_val)
-    அச்சிடு("Max:", max_val)
+    அச்சிடு("Sum:", கூட்டு(numbers))
+    அச்சிடு("Average:", கூட்டு(numbers) / நீளம்(numbers))
+    அச்சிடு("Min:", குறைந்தபட்சம்(numbers))
+    அச்சிடு("Max:", அதிகபட்சம்(numbers))
 
 statistics([10, 25, 5, 30, 15, 20])
+```
+
+### Example 4: File Processing
+
+```
+# Read, process, and write file
+என்றால் உள்ளது("input.txt"):
+    மாறி content = படி("input.txt")
+    மாறி upper_content = மேல்(content)
+    எழுது("output.txt", upper_content)
+    அச்சிடு("File processed successfully!")
+இல்லை:
+    அச்சிடு("Input file not found!")
 ```
 
 ---
@@ -241,7 +592,11 @@ Built-in functions save you time by providing common operations:
 
 - **I/O**: `அச்சிடு`, `உள்ளீடு`
 - **Types**: `எண்ணாக`, `தசமாக`, `சரமாக`, `வகை`
-- **Collections**: `நீளம்`, `வரம்பு`, `சேர்`, `நீக்கு`
+- **Collections**: `நீளம்`, `வரம்பு`, `சேர்`, `நீக்கு`, `வரிசை`, `தலைகீழ்`
+- **Math**: `வர்க்கம்`, `அடி`, `தளம்`, `கூரை`, `முழுமை`, `குறைந்தபட்சம்`, `அதிகபட்சம்`, `கூட்டு`, `தற்செயல்`
+- **String**: `பிரி`, `இணை`, `மேல்`, `கீழ்`, `ஒழுங்கு`, `மாற்று`, `தொடங்கு`, `முடிவு`, `உள்ளதா`
+- **File I/O**: `படி`, `எழுது`, `உள்ளது`
+- **System**: `வெளியேறு`
 
 ---
 

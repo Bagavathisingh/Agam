@@ -33,6 +33,14 @@ Welcome to **The agam Book** - a comprehensive guide to learning programming in 
 13. [Keywords Reference](13_keywords.md) - முக்கிய சொற்கள்
 14. [Error Messages](14_errors.md) - பிழைச் செய்திகள்
 
+### Advanced Features
+15. [Structs](15_structs.md) - கட்டமைப்புகள்
+16. [Enums](16_enums.md) - விருப்பங்கள்
+17. [Pattern Matching](17_pattern_matching.md) - பொருத்தமிடுதல்
+18. [Error Handling](18_error_handling.md) - பிழை கையாளுதல்
+19. [Modules](19_modules.md) - தொகுப்புகள்
+20. [File I/O](20_file_io.md) - கோப்பு படிக்க/எழுத
+
 ---
 
 ## 🎯 Who is this for?
@@ -52,6 +60,23 @@ This book is for:
 ```
 
 Output: `வணக்கம், உலகம்!`
+
+---
+
+## 📊 Language Features
+
+| Feature | Tamil Keyword | Description |
+|---------|---------------|-------------|
+| Variables | `மாறி` | Declare variables |
+| Constants | `மாறாத` | Declare constants |
+| Functions | `செயல்` | Define functions |
+| If/Else | `என்றால்/இல்லை` | Conditionals |
+| Loops | `வரை/ஒவ்வொரு` | While/For loops |
+| Structs | `கட்டமைப்பு` | Custom data types |
+| Enums | `விருப்பம்` | Enumerations |
+| Pattern Matching | `பொருத்து` | Match expressions |
+| Error Handling | `முயற்சி/பிடி` | Try-Catch |
+| Modules | `இறக்குமதி` | Import modules |
 
 ---
 

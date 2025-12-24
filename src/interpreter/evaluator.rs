@@ -216,7 +216,7 @@ impl Evaluator {
             Statement::Continue => Ok(ControlFlow::Continue),
             
             // Import statement - load and execute external module
-            Statement::Import { module, items: _ } => {
+            Statement::Import { module, items } => {
                 // Try to find and load the module file
                 let module_path = format!("{}.agam", module);
                 
@@ -231,9 +231,59 @@ impl Evaluator {
                         AgamError::runtime_error(0, 0, format!("Module parse error: {}", e))
                     })?;
                     
-                    // Execute module in current environment
+                    // Create a temporary environment for module execution
+                    let module_env = Rc::new(RefCell::new(Environment::new()));
+                    
+                    // Register built-ins in module environment
+                    for (name, func) in crate::interpreter::builtin::create_builtins() {
+                        module_env.borrow_mut().define(name, Value::NativeFunction(func), true);
+                    }
+                    
+                    // Execute module in temporary environment
+                    let previous_env = Rc::clone(&self.environment);
+                    self.environment = Rc::clone(&module_env);
+                    
                     for stmt in &program.statements {
                         self.execute_statement(stmt)?;
+                    }
+                    
+                    self.environment = previous_env;
+                    
+                    // Import items from module environment to current environment
+                    match items {
+                        Some(item_names) => {
+                            // Selective import - only import specified items
+                            for item_name in item_names {
+                                if let Some(value) = module_env.borrow().get(item_name) {
+                                    self.environment.borrow_mut().define(item_name.clone(), value, true);
+                                } else {
+                                    return Err(AgamError::runtime_error(
+                                        0, 0,
+                                        format!("'{}' கூறில் '{}' கிடைக்கவில்லை", module, item_name),
+                                    ));
+                                }
+                            }
+                        }
+                        None => {
+                            // Namespace import - create a Module value with all exports
+                            let mut exports = std::collections::HashMap::new();
+                            let module_values: Vec<_> = module_env.borrow().get_all_names();
+                            for name in module_values {
+                                // Skip builtins (they're already in globals)
+                                if let Some(value) = module_env.borrow().get(&name) {
+                                    if !matches!(value, Value::NativeFunction(_)) {
+                                        exports.insert(name, value);
+                                    }
+                                }
+                            }
+                            
+                            // Store the module as a namespace
+                            let module_value = Value::Module {
+                                name: module.clone(),
+                                exports: Rc::new(RefCell::new(exports)),
+                            };
+                            self.environment.borrow_mut().define(module.clone(), module_value, true);
+                        }
                     }
                     
                     Ok(ControlFlow::None)
@@ -511,6 +561,15 @@ impl Evaluator {
                             ))
                         }
                     }
+                    // Module namespace access: module.function
+                    Value::Module { name: _, exports } => {
+                        exports.borrow().get(member).cloned().ok_or_else(|| {
+                            AgamError::runtime_error(
+                                0, 0,
+                                format!("'{}' கூறில் கிடைக்கவில்லை", member),
+                            )
+                        })
+                    }
                     _ => Err(AgamError::runtime_error(
                         0, 0,
                         format!("'{}' வகையில் புலம் அணுக இயலாது", obj.type_name()),
@@ -556,6 +615,69 @@ impl Evaluator {
                     _ => Err(AgamError::runtime_error(
                         0, 0,
                         format!("'{}' ஒரு கட்டமைப்பு அல்ல", name),
+                    )),
+                }
+            }
+
+            // Index assignment: list[0] = value, dict["key"] = value
+            Expression::IndexAssignment { object, index, value } => {
+                let obj = self.evaluate(object)?;
+                let idx = self.evaluate(index)?;
+                let val = self.evaluate(value)?;
+
+                match (&obj, &idx) {
+                    (Value::List(list), Value::Number(n)) => {
+                        let i = *n as i64;
+                        let mut list_ref = list.borrow_mut();
+                        let len = list_ref.len() as i64;
+                        
+                        let actual_idx = if i < 0 { len + i } else { i };
+                        
+                        if actual_idx < 0 || actual_idx >= len {
+                            return Err(AgamError::runtime_error(
+                                0, 0,
+                                format!("குறியீட்டு {} வரம்பிற்கு வெளியே", n),
+                            ));
+                        }
+                        list_ref[actual_idx as usize] = val.clone();
+                        Ok(val)
+                    }
+                    (Value::Dict(dict), _) => {
+                        let key = match &idx {
+                            Value::String(s) => s.clone(),
+                            v => v.to_string(),
+                        };
+                        dict.borrow_mut().insert(key, val.clone());
+                        Ok(val)
+                    }
+                    _ => Err(AgamError::runtime_error(
+                        0, 0,
+                        format!("'{}' வகையை குறியீட்டு ஒதுக்க இயலாது", obj.type_name()),
+                    )),
+                }
+            }
+
+            // Member assignment: struct.field = value
+            Expression::MemberAssignment { object, member, value } => {
+                // Evaluate the struct object - this returns a Value::Struct with Rc<RefCell> fields
+                // Since fields use Rc<RefCell>, modifications will persist in the original struct
+                let obj = self.evaluate(object)?;
+                let val = self.evaluate(value)?;
+                
+                match obj {
+                    Value::Struct { name: _, fields } => {
+                        if !fields.borrow().contains_key(member) {
+                            return Err(AgamError::runtime_error(
+                                0, 0,
+                                format!("புலம் '{}' கிடைக்கவில்லை", member),
+                            ));
+                        }
+                        fields.borrow_mut().insert(member.clone(), val.clone());
+                        Ok(val)
+                    }
+                    _ => Err(AgamError::runtime_error(
+                        0, 0,
+                        format!("'{}' வகையில் புலம் ஒதுக்க இயலாது", obj.type_name()),
                     )),
                 }
             }
@@ -695,6 +817,29 @@ impl Evaluator {
 
                 (func.function)(&args)
                     .map_err(|msg| AgamError::runtime_error(0, 0, msg))
+            }
+
+            // Struct instantiation via constructor call: StructName(arg1, arg2, ...)
+            Value::StructDef { name: struct_name, field_names } => {
+                if args.len() != field_names.len() {
+                    return Err(AgamError::runtime_error(
+                        0, 0,
+                        format!(
+                            "கட்டமைப்பு '{}' {} புலங்களை எதிர்பார்க்கிறது, {} கொடுக்கப்பட்டது",
+                            struct_name, field_names.len(), args.len()
+                        ),
+                    ));
+                }
+
+                let mut fields = std::collections::HashMap::new();
+                for (field_name, arg) in field_names.iter().zip(args.into_iter()) {
+                    fields.insert(field_name.clone(), arg);
+                }
+
+                Ok(Value::Struct {
+                    name: struct_name,
+                    fields: Rc::new(RefCell::new(fields)),
+                })
             }
 
             _ => Err(AgamError::runtime_error(

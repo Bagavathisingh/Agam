@@ -19,6 +19,12 @@ const routeMap: Record<string, string> = {
     "dictionaries": "12_dictionaries.md",
     "keywords": "13_keywords.md",
     "errors": "14_errors.md",
+    "structs": "15_structs.md",
+    "enums": "16_enums.md",
+    "pattern-matching": "17_pattern_matching.md",
+    "error-handling": "18_error_handling.md",
+    "modules": "19_modules.md",
+    "file-io": "20_file_io.md",
 }
 
 export function DocPage() {

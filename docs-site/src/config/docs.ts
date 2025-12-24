@@ -56,5 +56,17 @@ export const docsConfig: { sidebarNav: NavItem[] } = {
                 { title: "Error Messages", href: "/docs/errors" },
             ],
         },
+        {
+            title: "Advanced Features",
+            href: "/docs/advanced-features",
+            items: [
+                { title: "Structs", href: "/docs/structs" },
+                { title: "Enums", href: "/docs/enums" },
+                { title: "Pattern Matching", href: "/docs/pattern-matching" },
+                { title: "Error Handling", href: "/docs/error-handling" },
+                { title: "Modules", href: "/docs/modules" },
+                { title: "File I/O", href: "/docs/file-io" },
+            ],
+        },
     ],
 }

@@ -55,6 +55,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.1.1] - 2025-12-24
+
+### Fixed - மேற்கொண்டவை
+- List, Dictionary, import methods (issue #1)
+- Documentation (issue #2)
+- minor typos
+- minor bugs fixed
+
+
 ## Future Plans - எதிர்கால திட்டங்கள்
 
 ### [0.2.0] - Planned

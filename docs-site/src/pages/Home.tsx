@@ -11,7 +11,7 @@ export function Home() {
                         className="rounded-2xl bg-muted px-4 py-1.5 text-sm font-medium"
                         target="_blank"
                     >
-                        v0.1.0 is here! <span className="font-bold text-primary">Read the changelog</span>
+                        v0.1.1 is here! <span className="font-bold text-primary">Read the changelog</span>
                     </Link>
                     <h1 className="font-heading text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-teal-500 to-primary pb-2">
                         Program in your <br /> mother tongue.

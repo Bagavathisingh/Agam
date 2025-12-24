@@ -1,6 +1,5 @@
 # அகம் (Agam) — Tamil Programming Language
 
-![Version](https://img.shields.io/badge/version-0.1.0-blue)
 ![Language](https://img.shields.io/badge/built%20with-Rust-orange)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
@@ -117,6 +116,8 @@ Agam’s goal is to make programming **native, accessible, and powerful** for Ta
 
 ## 📖 Supported Keywords
 
+### Core Keywords
+
 | Tamil           | English  | Purpose       |
 | --------------- | -------- | ------------- |
 | `செயல்`         | `fn`     | Function      |
@@ -129,9 +130,42 @@ Agam’s goal is to make programming **native, accessible, and powerful** for Ta
 | `ஒவ்வொரு`       | `for`    | For loop      |
 | `உள்ள`          | `in`     | In            |
 | `திரும்பு`      | `return` | Return        |
-| `அச்சிடு`       | `print`  | Output        |
+| `நிறுத்து`      | `break`  | Break loop    |
+| `தொடர்`         | `continue` | Continue loop |
 | `உண்மை`         | `true`   | Boolean true  |
 | `பொய்`          | `false`  | Boolean false |
+| `இல்லா`         | `null`   | Null value    |
+| `மற்றும்`       | `and`    | Logical AND   |
+| `அல்லது`        | `or`     | Logical OR    |
+| `இல்ல`          | `not`    | Logical NOT   |
+
+### Advanced Features
+
+| Tamil           | English  | Purpose           |
+| --------------- | -------- | ----------------- |
+| `கட்டமைப்பு`    | `struct` | Define struct     |
+| `விருப்பம்`     | `enum`   | Define enum       |
+| `பொருத்து`      | `match`  | Pattern matching  |
+| `இறக்குமதி`     | `import` | Import module     |
+| `இருந்து`       | `from`   | From (for imports)|
+| `முயற்சி`       | `try`    | Try block         |
+| `பிடி`          | `catch`  | Catch block       |
+| `வீசு`          | `throw`  | Throw error       |
+
+### Built-in Functions
+
+| Tamil          | English     | Purpose           |
+| -------------- | ----------- | ----------------- |
+| `அச்சிடு`      | `print`     | Output            |
+| `உள்ளீடு`      | `input`     | Input             |
+| `நீளம்`        | `len`       | Get length        |
+| `வகை`          | `type`      | Get type          |
+| `வரம்பு`       | `range`     | Number range      |
+| `வர்க்கம்`     | `sqrt`      | Square root       |
+| `படி`          | `read_file` | Read file         |
+| `எழுது`        | `write_file`| Write file        |
+
+> 📚 See the [complete documentation](docs/README.md) for all 33+ built-in functions!
 
 ---
 

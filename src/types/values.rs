@@ -48,6 +48,11 @@ pub enum Value {
         name: String,
         variants: Vec<String>,
     },
+    /// Module namespace (கூறு)
+    Module {
+        name: String,
+        exports: Rc<RefCell<HashMap<String, Value>>>,
+    },
 }
 
 impl fmt::Debug for Value {
@@ -93,6 +98,7 @@ impl fmt::Debug for Value {
             Value::EnumVariant { enum_name, variant } => write!(f, "{}.{}", enum_name, variant),
             Value::StructDef { name, .. } => write!(f, "<கட்டமைப்பு {}>", name),
             Value::EnumDef { name, .. } => write!(f, "<விருப்பம் {}>", name),
+            Value::Module { name, .. } => write!(f, "<கூறு {}>", name),
         }
     }
 }
@@ -146,6 +152,7 @@ impl fmt::Display for Value {
             Value::EnumVariant { enum_name, variant } => write!(f, "{}.{}", enum_name, variant),
             Value::StructDef { name, .. } => write!(f, "<கட்டமைப்பு {}>", name),
             Value::EnumDef { name, .. } => write!(f, "<விருப்பம் {}>", name),
+            Value::Module { name, .. } => write!(f, "<கூறு {}>", name),
         }
     }
 }
@@ -180,6 +187,7 @@ impl Value {
             Value::EnumVariant { .. } => true,
             Value::StructDef { .. } => true,
             Value::EnumDef { .. } => true,
+            Value::Module { .. } => true,
         }
     }
 
@@ -198,6 +206,7 @@ impl Value {
             Value::EnumVariant { .. } => "விருப்பம்_மதிப்பு",
             Value::StructDef { .. } => "கட்டமைப்பு_வரையறை",
             Value::EnumDef { .. } => "விருப்பம்_வரையறை",
+            Value::Module { .. } => "கூறு",
         }
     }
 }
@@ -310,6 +319,11 @@ impl Environment {
             return parent.borrow_mut().assign(name, value);
         }
         Err(format!("வரையறுக்கப்படாத மாறி '{}'", name))
+    }
+
+    /// Get all variable names in this environment (not including parent)
+    pub fn get_all_names(&self) -> Vec<String> {
+        self.values.keys().cloned().collect()
     }
 }
 
