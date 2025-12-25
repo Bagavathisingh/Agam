@@ -5,11 +5,7 @@
 A dictionary stores data as **key-value pairs**:
 
 ```
-மாறி person = {
-    "name": "Tamil",
-    "age": 25,
-    "city": "Chennai"
-}
+மாறி person = {"name": "Tamil", "age": 25, "city": "Chennai"}
 ```
 
 ---
@@ -21,11 +17,7 @@ A dictionary stores data as **key-value pairs**:
 மாறி empty = {}
 
 # With values
-மாறி student = {
-    "name": "Arjun",
-    "grade": 10,
-    "subjects": ["Math", "Science", "Tamil"]
-}
+மாறி student = {"name": "Arjun", "grade": 10, "subjects": ["Math", "Science", "Tamil"]}
 ```
 
 ---
@@ -35,10 +27,7 @@ A dictionary stores data as **key-value pairs**:
 Use the key to get its value:
 
 ```
-மாறி person = {
-    "name": "Tamil",
-    "age": 25
-}
+மாறி person = {"name": "Tamil", "age": 25}
 
 அச்சிடு(person["name"])   # Output: Tamil
 அச்சிடு(person["age"])    # Output: 25
@@ -51,15 +40,7 @@ Use the key to get its value:
 ### Example 1: Student Record
 
 ```
-மாறி student = {
-    "name": "Priya",
-    "roll": 101,
-    "marks": {
-        "math": 95,
-        "science": 88,
-        "tamil": 92
-    }
-}
+மாறி student = {"name": "Priya", "roll": 101, "marks": {"math": 95, "science": 88, "tamil": 92}}
 
 அச்சிடு("Name:", student["name"])
 அச்சிடு("Roll:", student["roll"])

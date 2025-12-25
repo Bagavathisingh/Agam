@@ -726,6 +726,13 @@ impl Parser {
             return Ok(Expression::String(s));
         }
 
+        // F-String (interpolated string): f"Hello {name}!"
+        if let Some(TokenType::FString(content)) = self.peek_token_type() {
+            let content = content.clone();
+            self.advance();
+            return self.parse_fstring_parts(&content);
+        }
+
         // Identifier
         if let Some(TokenType::Identifier(name)) = self.peek_token_type() {
             let name = name.clone();
@@ -733,8 +740,59 @@ impl Parser {
             return Ok(Expression::Identifier(name));
         }
 
-        // Grouping
+        // Input function (உள்ளீடு / input) - treat keyword as callable identifier
+        if self.match_token(&[TokenType::Ulleedu]) {
+            return Ok(Expression::Identifier("உள்ளீடு".to_string()));
+        }
+
+        // Lambda expression: செயலி(params): expression or lambda(params): expression
+        if self.match_token(&[TokenType::Seyali]) {
+            return self.lambda_expression();
+        }
+
+        // Grouping or arrow lambda: (expr) or (params) => expr
         if self.match_token(&[TokenType::LeftParen]) {
+            // Check if this might be an arrow lambda
+            // Try to parse as parameters first, then check for =>
+            let start = self.current;
+            
+            // Try parsing as parameter list
+            let mut params = Vec::new();
+            let mut might_be_lambda = true;
+            
+            if !self.check(&TokenType::RightParen) {
+                loop {
+                    if let Some(TokenType::Identifier(name)) = self.peek_token_type() {
+                        params.push(name.clone());
+                        self.advance();
+                    } else {
+                        // Not a valid parameter, this is a grouping
+                        might_be_lambda = false;
+                        break;
+                    }
+                    
+                    if !self.match_token(&[TokenType::Comma]) {
+                        break;
+                    }
+                }
+            }
+            
+            // Check for ) =>
+            if might_be_lambda && self.check(&TokenType::RightParen) {
+                self.advance(); // consume )
+                
+                if self.check(&TokenType::Arrow) {
+                    self.advance(); // consume =>
+                    let body = self.expression()?;
+                    return Ok(Expression::Lambda {
+                        params,
+                        body: Box::new(body),
+                    });
+                }
+            }
+            
+            // Not a lambda, backtrack and parse as grouping
+            self.current = start;
             let expr = self.expression()?;
             self.consume(&TokenType::RightParen, "')' எதிர்பார்க்கப்படுகிறது")?;
             return Ok(Expression::Grouping(Box::new(expr)));
@@ -774,6 +832,114 @@ impl Parser {
         }
 
         Err(self.error("வெளிப்பாடு எதிர்பார்க்கப்படுகிறது"))
+    }
+
+    /// Parse lambda expression: செயலி(params): expression
+    fn lambda_expression(&mut self) -> Result<Expression, AgamError> {
+        self.consume(&TokenType::LeftParen, "'(' எதிர்பார்க்கப்படுகிறது")?;
+        
+        let mut params = Vec::new();
+        if !self.check(&TokenType::RightParen) {
+            loop {
+                params.push(self.consume_identifier("அளவுரு பெயர் எதிர்பார்க்கப்படுகிறது")?);
+                if !self.match_token(&[TokenType::Comma]) {
+                    break;
+                }
+            }
+        }
+        
+        self.consume(&TokenType::RightParen, "')' எதிர்பார்க்கப்படுகிறது")?;
+        self.consume(&TokenType::Colon, "':' எதிர்பார்க்கப்படுகிறது")?;
+        
+        let body = self.expression()?;
+        
+        Ok(Expression::Lambda {
+            params,
+            body: Box::new(body),
+        })
+    }
+
+    /// Parse f-string content into parts
+    /// Content like "Hello {name}! You are {age} years old" becomes:
+    /// [Literal("Hello "), Expression(name), Literal("! You are "), Expression(age), Literal(" years old")]
+    fn parse_fstring_parts(&mut self, content: &str) -> Result<Expression, AgamError> {
+        let mut parts = Vec::new();
+        let mut chars = content.chars().peekable();
+        let mut current_literal = String::new();
+        
+        while let Some(c) = chars.next() {
+            if c == '{' {
+                // Check for escaped brace {{
+                if chars.peek() == Some(&'{') {
+                    chars.next();
+                    current_literal.push('{');
+                    continue;
+                }
+                
+                // Save any accumulated literal
+                if !current_literal.is_empty() {
+                    parts.push(FStringPart::Literal(current_literal.clone()));
+                    current_literal.clear();
+                }
+                
+                // Extract expression until }
+                let mut expr_str = String::new();
+                let mut brace_depth = 1;
+                
+                while let Some(c) = chars.next() {
+                    if c == '{' {
+                        brace_depth += 1;
+                        expr_str.push(c);
+                    } else if c == '}' {
+                        brace_depth -= 1;
+                        if brace_depth == 0 {
+                            break;
+                        }
+                        expr_str.push(c);
+                    } else {
+                        expr_str.push(c);
+                    }
+                }
+                
+                if brace_depth != 0 {
+                    return Err(self.error("f-சரத்தில் '}' எதிர்பார்க்கப்படுகிறது"));
+                }
+                
+                // Parse the expression
+                let expr = self.parse_embedded_expression(&expr_str)?;
+                parts.push(FStringPart::Expression(Box::new(expr)));
+            } else if c == '}' {
+                // Check for escaped brace }}
+                if chars.peek() == Some(&'}') {
+                    chars.next();
+                    current_literal.push('}');
+                    continue;
+                }
+                // Single } without matching { is an error
+                return Err(self.error("f-சரத்தில் எதிர்பாராத '}'"));
+            } else {
+                current_literal.push(c);
+            }
+        }
+        
+        // Add any remaining literal
+        if !current_literal.is_empty() {
+            parts.push(FStringPart::Literal(current_literal));
+        }
+        
+        Ok(Expression::FString { parts })
+    }
+    
+    /// Parse an embedded expression within an f-string
+    fn parse_embedded_expression(&mut self, expr_str: &str) -> Result<Expression, AgamError> {
+        // Tokenize the expression
+        let tokens = crate::lexer::Lexer::tokenize(expr_str).map_err(|e| {
+            self.error(&format!("f-சரத்தில் பிழை: {}", e))
+        })?;
+        
+        // Parse the expression
+        let mut sub_parser = Parser::new(tokens);
+        sub_parser.expression()
     }
 
     // Helper methods

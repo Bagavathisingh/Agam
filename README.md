@@ -1,45 +1,42 @@
-# அகம் (Agam) — Tamil Programming Language
+<p align="center">
+  <img src="assets/agam-banner.svg" alt="Agam Tamil Programming Language" />
+</p>
 
-![Language](https://img.shields.io/badge/built%20with-Rust-orange)
-![License](https://img.shields.io/badge/license-MIT-green)
-
-**தமிழில் நிரலாக்கம் செய்யுங்கள்!**
-*Program in Tamil.*
-
----
-
-## 🌟 Introduction
-
-**அகம் (Agam)** is a modern, fast, and safe **Tamil-first programming language** designed for real-world usage.
-
-Agam enables developers, students, and educators to write expressive programs **entirely in Tamil**, while enjoying **Python inspired simplicity** and **Rust-powered performance and safety**.
-
-> **Created by:** **Balapriyan B**
-> **Assisted by:** **Claude Sonnet 4.5**
-
-Agam’s goal is to make programming **native, accessible, and powerful** for Tamil-speaking communities.
+<p align="center">
+  <img src="https://img.shields.io/github/v/release/Aruvili/Agam" />
+  <img src="https://img.shields.io/badge/docs-agam.aruvili.com-brightgreen" />
+  <img src="https://img.shields.io/github/license/Aruvili/Agam" />
+  <img src="https://img.shields.io/github/stars/Aruvili/Agam?style=social" />
+</p>
 
 ---
 
-## ✨ Key Highlights
+# 🔥 அகம் (Agam) — Tamil Programming Language
 
-* 🇮🇳 **Tamil-first language** — write programs fully in Tamil
-* 🐍 **Python inspired syntax** — simple, readable, indentation-based
-* ⚡ **High performance** — powered by Rust
-* 🔒 **Memory safe & type secure**
-* 🖥️ **Interactive REPL**
-* 🎓 **Education-ready**
-* 🚀 **Designed for production use**
+> **Program in Tamil. Build for the real world.**
+
+**அகம் (Agam)** is a **modern, fast, and safe Tamil-first programming language** designed for learning, scripting, and future production use.  
+It combines **Python-like simplicity** with **Rust-powered performance and safety**.
 
 ---
 
-## 🚀 Quick Start
+## ✨ Why Agam?
 
-### Hello World
+- 🇮🇳 Write programs **entirely in Tamil**
+- 🐍 Simple, readable, Python-inspired syntax
+- ⚡ High performance (built with Rust)
+- 🔒 Memory-safe and type-secure
+- 🖥️ Interactive REPL
+- 🎓 Perfect for education & beginners
+- 🚀 Built with long-term production goals
+
+---
+
+## 🚀 Quick Example
 
 ```agam
 அச்சிடு("வணக்கம் உலகம்!")
-```
+````
 
 **Output**
 
@@ -176,68 +173,65 @@ Launch the REPL:
 agam
 ```
 
-```
-╔════════════════════════════════════════════╗
-║  அகம் - Agam Programming Language v0.1.0  ║
-║  தமிழில் நிரலாக்கம் செய்யுங்கள்!          ║
-╚════════════════════════════════════════════╝
-
->>> மாறி x = 10
->>> அச்சிடு(x * 2)
-20
->>> வெளியேறு()
-நன்றி! மீண்டும் வருக! 🙏
-```
+No setup. No dependencies. Just run.
 
 ---
 
-## 📦 Installation
+## 📘 Documentation
 
-### Using Prebuilt Binary (Recommended)
+Complete and official documentation is available at:
 
-> [ALL DOWNLOAD LINKS INCLUDED HERE](https://github.com/Aruvili/Agam/releases)
+🌐 **[https://agam.aruvili.com](https://agam.aruvili.com)**
 
-Prebuilt binaries for **Windows, macOS, and Linux** will be available after the first GitHub release.
+Includes:
 
-Users will be able to:
-
-* Download a single executable
-* Run `agam` instantly
-* Use Agam without installing Rust or Cargo
-
----
-
-## 🎯 Use Cases
-
-* Learning programming in Tamil
-* Schools & colleges
-* Beginner-friendly scripting
-* Algorithm learning
-* REPL-based experimentation
-* Community-driven projects
-
+* Getting started
+* Language syntax & keywords
+* Conditions, loops, functions
+* Lambda expressions
+* Standard library
+* REPL usage
+* Examples & FAQs
 
 ---
 
-## 🤝 Community
+## 👨‍💻 Credits
 
-Agam is **open-source and community-driven**.
-Feedback, ideas, and contributions are welcome.
+### 🧠 Language
+
+* **Created by:** [**Balapriyan B**](https://github.com/BalaPriyan)
+* **Assisted by:** Claude Sonnet 4.5
+
+### 🖥️ Tested
+* **Language Tested By**: [**Sriram G**](https://github.com/GGSriram)
+
+### 📘 Documentation
+
+* **Developed by:** [**Bagavathisingh B**](https://github.com/Bagavathisingh)
+* **Hosted at:** [https://agam.aruvili.com](https://agam.aruvili.com)
+
+### 📝 README 
+* **crafted by**: **ChatGPT**
+
+---
+
+## 🤝 Contributing
+
+Agam is **open-source and community-driven** ❤️
+Contributions, ideas, issues, and improvements are always welcome.
+
+⭐ If you like Agam, please **star the repository** — it helps the Tamil developer ecosystem grow.
 
 ---
 
 ## 📜 License
 
-[MIT License](LICENSE).
+MIT License © Aruvili
 
 ---
 
 ### 🇮🇳 **அகம் — தமிழில் நிரலாக்கத்தின் எதிர்காலம்**
 
-Created by **Balapriyan B**
-Assisted by **Claude Sonnet 4.5**
-
-### README.md
-Credits To CHATGPT
+Built with ❤️ for the Tamil developer community
 
 ---

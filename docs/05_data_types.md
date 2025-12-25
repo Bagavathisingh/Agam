@@ -105,6 +105,24 @@ Strings are text enclosed in double quotes:
 அச்சிடு(quote)   # Output: He said "Hello"
 ```
 
+### String Interpolation (F-Strings)
+
+As of version 0.1.2, you can embed expressions directly inside strings using `f` prefix and `{}`:
+
+```agam
+மாறி name = "Kumar"
+மாறி age = 25
+
+# Basic interpolation
+அச்சிடு(f"வணக்கம் {name}!")       # Output: வணக்கம் Kumar!
+
+# With expressions
+அச்சிடு(f"Next year: {age + 1}")  # Output: Next year: 26
+
+# Nested quotes (use different quote types)
+அச்சிடு(f"Status: {'Adult' if age >= 18 else 'Minor'}")
+```
+
 ---
 
 ## Booleans (உண்மைபொய்)

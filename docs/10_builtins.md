@@ -519,7 +519,65 @@ Exit the program:
 | `எழுது` | `write_file` | Write file | `எழுது("file.txt", "data")` |
 | `உள்ளது` | `file_exists` | File exists | `உள்ளது("file.txt")` → உண்மை/பொய் |
 
-### System Functions
+---
+
+## Standard Library Modules
+
+### Time Module
+
+| Tamil | English | Description |
+|-------|---------|-------------|
+| `நேரம்()` | `time()` | Current timestamp |
+| `தூக்கம்(n)` | `sleep(n)` | Sleep for n seconds |
+| `தேதி()` | `date()` | Current date string |
+| `நாள்()` | `now()` | Current time components |
+
+**Example:**
+```agam
+அச்சிடு(தேதி())   # 2024-10-25 15:30:00
+தூக்கம்(2)       # Wait 2 seconds
+அச்சிடு(நேரம்())  # 1729864200
+```
+
+### HTTP Module
+
+| Tamil | English | Description |
+|-------|---------|-------------|
+| `வலை_படி(url)` | `http_get(url)` | GET request |
+| `வலை_அனுப்பு(url, data)` | `http_post(url, data)` | POST request |
+| `வலை_புதுப்பி(url, data)` | `http_put(url, data)` | PUT request |
+| `வலை_நீக்கு(url)` | `http_delete(url)` | DELETE request |
+| `வலை_கோரிக்கை(config)` | `http_request(config)` | Custom request |
+| `கோப்பு_பதிவேற்று(url, path)` | `file_upload(url)` | Upload file |
+| `json_படி(str)` | `json_parse(str)` | Parse JSON |
+
+**Example:**
+```agam
+# GET request
+மாறி data = http_get("https://api.example.com/users")
+அச்சிடு(data["status"])
+
+# Custom request
+மாறி resp = http_request({
+    "url": "https://api.example.com",
+    "method": "POST",
+    "headers": {"Auth": "Token"},
+    "body": {"name": "Test"}
+})
+```
+
+### WebSocket Module
+
+| Tamil | English | Description |
+|-------|---------|-------------|
+| `சாக்கெட்_இணை(url)` | `ws_connect(url)` | Connect to WebSocket |
+| `சாக்கெட்_அனுப்பு(conn, msg)` | `ws_send(conn, msg)` | Send message |
+| `சாக்கெட்_படி(conn)` | `ws_receive(conn)` | Receive message |
+| `சாக்கெட்_மூடு(conn)` | `ws_close(conn)` | Close connection |
+
+---
+
+## System Functions
 
 | Tamil | English | Purpose | Example |
 |-------|---------|---------|---------|

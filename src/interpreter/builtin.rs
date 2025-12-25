@@ -3,9 +3,20 @@
 //! Native functions available in all programs
 
 use crate::types::{Value, NativeFunction};
-use std::io::{self, Write};
+use std::io::{self, Write, Read};
 use std::rc::Rc;
 use std::cell::RefCell;
+use std::sync::Mutex;
+use std::collections::HashMap;
+use std::net::TcpStream;
+use tungstenite::{WebSocket, Message, connect};
+
+// Global WebSocket connections storage
+lazy_static::lazy_static! {
+    static ref WS_CONNECTIONS: Mutex<HashMap<u64, WebSocket<tungstenite::stream::MaybeTlsStream<TcpStream>>>> = 
+        Mutex::new(HashMap::new());
+    static ref WS_COUNTER: Mutex<u64> = Mutex::new(0);
+}
 
 /// Create all built-in functions
 pub fn create_builtins() -> Vec<(String, NativeFunction)> {
@@ -149,6 +160,69 @@ pub fn create_builtins() -> Vec<(String, NativeFunction)> {
         // வெளியேறு - exit
         ("வெளியேறு".to_string(), NativeFunction::new("வெளியேறு", None, builtin_exit)),
         ("exit".to_string(), NativeFunction::new("exit", None, builtin_exit)),
+        
+        // === Time Module ===
+        // நேரம் - time (unix timestamp)
+        ("நேரம்".to_string(), NativeFunction::new("நேரம்", Some(0), builtin_time)),
+        ("time".to_string(), NativeFunction::new("time", Some(0), builtin_time)),
+        
+        // தூக்கம் - sleep (pause execution)
+        ("தூக்கம்".to_string(), NativeFunction::new("தூக்கம்", Some(1), builtin_sleep)),
+        ("sleep".to_string(), NativeFunction::new("sleep", Some(1), builtin_sleep)),
+        
+        // தேதி - date (formatted date string)
+        ("தேதி".to_string(), NativeFunction::new("தேதி", None, builtin_date)),
+        ("date".to_string(), NativeFunction::new("date", None, builtin_date)),
+        
+        // நாள் - now (current time components)
+        ("நாள்".to_string(), NativeFunction::new("நாள்", Some(0), builtin_now)),
+        ("now".to_string(), NativeFunction::new("now", Some(0), builtin_now)),
+        
+        // === HTTP Module ===
+        // வலை_படி - http_get (GET request)
+        ("வலை_படி".to_string(), NativeFunction::new("வலை_படி", Some(1), builtin_http_get)),
+        ("http_get".to_string(), NativeFunction::new("http_get", Some(1), builtin_http_get)),
+        
+        // வலை_அனுப்பு - http_post (POST request)
+        ("வலை_அனுப்பு".to_string(), NativeFunction::new("வலை_அனுப்பு", Some(2), builtin_http_post)),
+        ("http_post".to_string(), NativeFunction::new("http_post", Some(2), builtin_http_post)),
+        
+        // வலை_புதுப்பி - http_put (PUT request)
+        ("வலை_புதுப்பி".to_string(), NativeFunction::new("வலை_புதுப்பி", Some(2), builtin_http_put)),
+        ("http_put".to_string(), NativeFunction::new("http_put", Some(2), builtin_http_put)),
+        
+        // வலை_நீக்கு - http_delete (DELETE request)
+        ("வலை_நீக்கு".to_string(), NativeFunction::new("வலை_நீக்கு", Some(1), builtin_http_delete)),
+        ("http_delete".to_string(), NativeFunction::new("http_delete", Some(1), builtin_http_delete)),
+        
+        // கோப்பு_பதிவேற்று - file_upload (upload file via HTTP)
+        ("கோப்பு_பதிவேற்று".to_string(), NativeFunction::new("கோப்பு_பதிவேற்று", Some(2), builtin_file_upload)),
+        ("file_upload".to_string(), NativeFunction::new("file_upload", Some(2), builtin_file_upload)),
+        
+        // வலை_கோரிக்கை - http_request (custom HTTP request with headers)
+        ("வலை_கோரிக்கை".to_string(), NativeFunction::new("வலை_கோரிக்கை", None, builtin_http_request)),
+        ("http_request".to_string(), NativeFunction::new("http_request", None, builtin_http_request)),
+        
+        // === WebSocket Module ===
+        // சாக்கெட்_இணை - ws_connect (connect to WebSocket)
+        ("சாக்கெட்_இணை".to_string(), NativeFunction::new("சாக்கெட்_இணை", Some(1), builtin_ws_connect)),
+        ("ws_connect".to_string(), NativeFunction::new("ws_connect", Some(1), builtin_ws_connect)),
+        
+        // சாக்கெட்_அனுப்பு - ws_send (send message)
+        ("சாக்கெட்_அனுப்பு".to_string(), NativeFunction::new("சாக்கெட்_அனுப்பு", Some(2), builtin_ws_send)),
+        ("ws_send".to_string(), NativeFunction::new("ws_send", Some(2), builtin_ws_send)),
+        
+        // சாக்கெட்_படி - ws_receive (receive message)
+        ("சாக்கெட்_படி".to_string(), NativeFunction::new("சாக்கெட்_படி", Some(1), builtin_ws_receive)),
+        ("ws_receive".to_string(), NativeFunction::new("ws_receive", Some(1), builtin_ws_receive)),
+        
+        // சாக்கெட்_மூடு - ws_close (close connection)
+        ("சாக்கெட்_மூடு".to_string(), NativeFunction::new("சாக்கெட்_மூடு", Some(1), builtin_ws_close)),
+        ("ws_close".to_string(), NativeFunction::new("ws_close", Some(1), builtin_ws_close)),
+        
+        // JSON பகுப்பு - json_parse
+        ("json_படி".to_string(), NativeFunction::new("json_படி", Some(1), builtin_json_parse)),
+        ("json_parse".to_string(), NativeFunction::new("json_parse", Some(1), builtin_json_parse)),
     ]
 }
 
@@ -694,4 +768,804 @@ fn builtin_exit(args: &[Value]) -> Result<Value, String> {
         _ => return Err("வெளியேறு() எண் அளவுரு தேவை".to_string()),
     };
     std::process::exit(code);
+}
+
+// ============= Time Module =============
+
+/// Get current Unix timestamp in seconds
+fn builtin_time(_args: &[Value]) -> Result<Value, String> {
+    use std::time::{SystemTime, UNIX_EPOCH};
+    
+    let duration = SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .map_err(|e| format!("நேர பிழை: {}", e))?;
+    
+    Ok(Value::Number(duration.as_secs_f64()))
+}
+
+/// Sleep for specified seconds
+fn builtin_sleep(args: &[Value]) -> Result<Value, String> {
+    use std::thread;
+    use std::time::Duration;
+    
+    match args.first() {
+        Some(Value::Number(secs)) => {
+            if *secs < 0.0 {
+                return Err("தூக்கம்() நேர்மறை எண் தேவை".to_string());
+            }
+            let millis = (*secs * 1000.0) as u64;
+            thread::sleep(Duration::from_millis(millis));
+            Ok(Value::Null)
+        }
+        Some(v) => Err(format!("'{}' வகை தூக்கம்() க்கு பயன்படுத்த இயலாது", v.type_name())),
+        None => Err("தூக்கம்() ஒரு அளவுரு தேவை".to_string()),
+    }
+}
+
+/// Get formatted date string
+fn builtin_date(args: &[Value]) -> Result<Value, String> {
+    use std::time::{SystemTime, UNIX_EPOCH};
+    
+    let timestamp = match args.first() {
+        Some(Value::Number(ts)) => *ts as u64,
+        None => {
+            SystemTime::now()
+                .duration_since(UNIX_EPOCH)
+                .map_err(|e| format!("நேர பிழை: {}", e))?
+                .as_secs()
+        }
+        Some(v) => return Err(format!("'{}' வகை தேதி() க்கு பயன்படுத்த இயலாது", v.type_name())),
+    };
+    
+    // Convert to date components manually (simple implementation)
+    let secs_per_day = 86400u64;
+    let secs_per_hour = 3600u64;
+    let secs_per_min = 60u64;
+    
+    let days_since_epoch = timestamp / secs_per_day;
+    let time_of_day = timestamp % secs_per_day;
+    
+    let hours = time_of_day / secs_per_hour;
+    let minutes = (time_of_day % secs_per_hour) / secs_per_min;
+    let seconds = time_of_day % secs_per_min;
+    
+    // Calculate year/month/day (simplified - doesn't account for all leap years perfectly)
+    let mut year = 1970i64;
+    let mut remaining_days = days_since_epoch as i64;
+    
+    loop {
+        let days_in_year = if year % 4 == 0 && (year % 100 != 0 || year % 400 == 0) { 366 } else { 365 };
+        if remaining_days < days_in_year {
+            break;
+        }
+        remaining_days -= days_in_year;
+        year += 1;
+    }
+    
+    let is_leap = year % 4 == 0 && (year % 100 != 0 || year % 400 == 0);
+    let days_in_months = [31, if is_leap { 29 } else { 28 }, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+    
+    let mut month = 1;
+    for days in days_in_months {
+        if remaining_days < days {
+            break;
+        }
+        remaining_days -= days;
+        month += 1;
+    }
+    let day = remaining_days + 1;
+    
+    Ok(Value::String(format!(
+        "{:04}-{:02}-{:02} {:02}:{:02}:{:02}",
+        year, month, day, hours, minutes, seconds
+    )))
+}
+
+/// Get current time as a dictionary with components
+fn builtin_now(_args: &[Value]) -> Result<Value, String> {
+    use std::time::{SystemTime, UNIX_EPOCH};
+    use std::collections::HashMap;
+    
+    let timestamp = SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .map_err(|e| format!("நேர பிழை: {}", e))?
+        .as_secs();
+    
+    let secs_per_day = 86400u64;
+    let secs_per_hour = 3600u64;
+    let secs_per_min = 60u64;
+    
+    let days_since_epoch = timestamp / secs_per_day;
+    let time_of_day = timestamp % secs_per_day;
+    
+    let hours = time_of_day / secs_per_hour;
+    let minutes = (time_of_day % secs_per_hour) / secs_per_min;
+    let seconds = time_of_day % secs_per_min;
+    
+    // Calculate year/month/day
+    let mut year = 1970i64;
+    let mut remaining_days = days_since_epoch as i64;
+    
+    loop {
+        let days_in_year = if year % 4 == 0 && (year % 100 != 0 || year % 400 == 0) { 366 } else { 365 };
+        if remaining_days < days_in_year {
+            break;
+        }
+        remaining_days -= days_in_year;
+        year += 1;
+    }
+    
+    let is_leap = year % 4 == 0 && (year % 100 != 0 || year % 400 == 0);
+    let days_in_months = [31, if is_leap { 29 } else { 28 }, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+    
+    let mut month = 1;
+    for days in days_in_months {
+        if remaining_days < days {
+            break;
+        }
+        remaining_days -= days;
+        month += 1;
+    }
+    let day = remaining_days + 1;
+    
+    // Create dictionary with time components
+    let mut map = HashMap::new();
+    map.insert("ஆண்டு".to_string(), Value::Number(year as f64));
+    map.insert("year".to_string(), Value::Number(year as f64));
+    map.insert("மாதம்".to_string(), Value::Number(month as f64));
+    map.insert("month".to_string(), Value::Number(month as f64));
+    map.insert("நாள்".to_string(), Value::Number(day as f64));
+    map.insert("day".to_string(), Value::Number(day as f64));
+    map.insert("மணி".to_string(), Value::Number(hours as f64));
+    map.insert("hour".to_string(), Value::Number(hours as f64));
+    map.insert("நிமிடம்".to_string(), Value::Number(minutes as f64));
+    map.insert("minute".to_string(), Value::Number(minutes as f64));
+    map.insert("வினாடி".to_string(), Value::Number(seconds as f64));
+    map.insert("second".to_string(), Value::Number(seconds as f64));
+    
+    Ok(Value::Dict(Rc::new(RefCell::new(map))))
+}
+
+// ============= HTTP Module =============
+
+/// HTTP GET request
+fn builtin_http_get(args: &[Value]) -> Result<Value, String> {
+    match args.first() {
+        Some(Value::String(url)) => {
+            let response = ureq::get(url)
+                .call()
+                .map_err(|e| format!("HTTP பிழை: {}", e))?;
+            
+            let status = response.status();
+            let body = response.into_string()
+                .map_err(|e| format!("பதில் படிக்க இயலவில்லை: {}", e))?;
+            
+            // Return a dictionary with status and body
+            let mut map = std::collections::HashMap::new();
+            map.insert("நிலை".to_string(), Value::Number(status as f64));
+            map.insert("status".to_string(), Value::Number(status as f64));
+            map.insert("உடல்".to_string(), Value::String(body.clone()));
+            map.insert("body".to_string(), Value::String(body));
+            
+            Ok(Value::Dict(Rc::new(RefCell::new(map))))
+        }
+        Some(v) => Err(format!("'{}' வகை URL ஆக பயன்படுத்த இயலாது", v.type_name())),
+        None => Err("வலை_படி() URL தேவை".to_string()),
+    }
+}
+
+/// HTTP POST request
+fn builtin_http_post(args: &[Value]) -> Result<Value, String> {
+    let url = match args.first() {
+        Some(Value::String(s)) => s.clone(),
+        Some(v) => return Err(format!("'{}' வகை URL ஆக பயன்படுத்த இயலாது", v.type_name())),
+        None => return Err("வலை_அனுப்பு() URL தேவை".to_string()),
+    };
+    
+    let body = match args.get(1) {
+        Some(Value::String(s)) => s.clone(),
+        Some(Value::Dict(d)) => {
+            // Convert dict to JSON-like string
+            let d = d.borrow();
+            let pairs: Vec<String> = d.iter()
+                .map(|(k, v)| format!("\"{}\": {}", k, value_to_json(v)))
+                .collect();
+            format!("{{{}}}", pairs.join(", "))
+        }
+        Some(v) => return Err(format!("'{}' வகை POST body ஆக பயன்படுத்த இயலாது", v.type_name())),
+        None => return Err("வலை_அனுப்பு() body தேவை".to_string()),
+    };
+    
+    let response = ureq::post(&url)
+        .set("Content-Type", "application/json")
+        .send_string(&body)
+        .map_err(|e| format!("HTTP பிழை: {}", e))?;
+    
+    let status = response.status();
+    let response_body = response.into_string()
+        .map_err(|e| format!("பதில் படிக்க இயலவில்லை: {}", e))?;
+    
+    let mut map = std::collections::HashMap::new();
+    map.insert("நிலை".to_string(), Value::Number(status as f64));
+    map.insert("status".to_string(), Value::Number(status as f64));
+    map.insert("உடல்".to_string(), Value::String(response_body.clone()));
+    map.insert("body".to_string(), Value::String(response_body));
+    
+    Ok(Value::Dict(Rc::new(RefCell::new(map))))
+}
+
+/// HTTP PUT request
+fn builtin_http_put(args: &[Value]) -> Result<Value, String> {
+    let url = match args.first() {
+        Some(Value::String(s)) => s.clone(),
+        Some(v) => return Err(format!("'{}' வகை URL ஆக பயன்படுத்த இயலாது", v.type_name())),
+        None => return Err("வலை_புதுப்பி() URL தேவை".to_string()),
+    };
+    
+    let body = match args.get(1) {
+        Some(Value::String(s)) => s.clone(),
+        Some(Value::Dict(d)) => {
+            let d = d.borrow();
+            let pairs: Vec<String> = d.iter()
+                .map(|(k, v)| format!("\"{}\": {}", k, value_to_json(v)))
+                .collect();
+            format!("{{{}}}", pairs.join(", "))
+        }
+        Some(v) => return Err(format!("'{}' வகை PUT body ஆக பயன்படுத்த இயலாது", v.type_name())),
+        None => return Err("வலை_புதுப்பி() body தேவை".to_string()),
+    };
+    
+    let response = ureq::put(&url)
+        .set("Content-Type", "application/json")
+        .send_string(&body)
+        .map_err(|e| format!("HTTP பிழை: {}", e))?;
+    
+    let status = response.status();
+    let response_body = response.into_string()
+        .map_err(|e| format!("பதில் படிக்க இயலவில்லை: {}", e))?;
+    
+    let mut map = std::collections::HashMap::new();
+    map.insert("நிலை".to_string(), Value::Number(status as f64));
+    map.insert("status".to_string(), Value::Number(status as f64));
+    map.insert("உடல்".to_string(), Value::String(response_body.clone()));
+    map.insert("body".to_string(), Value::String(response_body));
+    
+    Ok(Value::Dict(Rc::new(RefCell::new(map))))
+}
+
+/// HTTP DELETE request
+fn builtin_http_delete(args: &[Value]) -> Result<Value, String> {
+    match args.first() {
+        Some(Value::String(url)) => {
+            let response = ureq::delete(url)
+                .call()
+                .map_err(|e| format!("HTTP பிழை: {}", e))?;
+            
+            let status = response.status();
+            let body = response.into_string()
+                .map_err(|e| format!("பதில் படிக்க இயலவில்லை: {}", e))?;
+            
+            let mut map = std::collections::HashMap::new();
+            map.insert("நிலை".to_string(), Value::Number(status as f64));
+            map.insert("status".to_string(), Value::Number(status as f64));
+            map.insert("உடல்".to_string(), Value::String(body.clone()));
+            map.insert("body".to_string(), Value::String(body));
+            
+            Ok(Value::Dict(Rc::new(RefCell::new(map))))
+        }
+        Some(v) => Err(format!("'{}' வகை URL ஆக பயன்படுத்த இயலாது", v.type_name())),
+        None => Err("வலை_நீக்கு() URL தேவை".to_string()),
+    }
+}
+
+/// Upload a file via HTTP POST multipart/form-data
+fn builtin_file_upload(args: &[Value]) -> Result<Value, String> {
+    let url = match args.first() {
+        Some(Value::String(s)) => s.clone(),
+        Some(v) => return Err(format!("'{}' வகை URL ஆக பயன்படுத்த இயலாது", v.type_name())),
+        None => return Err("கோப்பு_பதிவேற்று() URL தேவை".to_string()),
+    };
+    
+    let file_path = match args.get(1) {
+        Some(Value::String(s)) => s.clone(),
+        Some(v) => return Err(format!("'{}' வகை கோப்பு பாதையாக பயன்படுத்த இயலாது", v.type_name())),
+        None => return Err("கோப்பு_பதிவேற்று() கோப்பு பாதை தேவை".to_string()),
+    };
+    
+    // Read file content
+    let file_content = std::fs::read(&file_path)
+        .map_err(|e| format!("கோப்பு படிக்க இயலவில்லை: {}", e))?;
+    
+    // Get filename from path
+    let filename = std::path::Path::new(&file_path)
+        .file_name()
+        .and_then(|n| n.to_str())
+        .unwrap_or("file")
+        .to_string();
+    
+    // Detect content type based on extension
+    let content_type = match std::path::Path::new(&file_path)
+        .extension()
+        .and_then(|e| e.to_str())
+        .unwrap_or("")
+    {
+        "txt" => "text/plain",
+        "html" | "htm" => "text/html",
+        "css" => "text/css",
+        "js" => "application/javascript",
+        "json" => "application/json",
+        "xml" => "application/xml",
+        "jpg" | "jpeg" => "image/jpeg",
+        "png" => "image/png",
+        "gif" => "image/gif",
+        "pdf" => "application/pdf",
+        "zip" => "application/zip",
+        _ => "application/octet-stream",
+    };
+    
+    // Create multipart boundary
+    let boundary = format!("----AgamUpload{}", std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .map(|d| d.as_millis())
+        .unwrap_or(0));
+    
+    // Build multipart body
+    let mut body = Vec::new();
+    body.extend_from_slice(format!("--{}\r\n", boundary).as_bytes());
+    body.extend_from_slice(format!(
+        "Content-Disposition: form-data; name=\"file\"; filename=\"{}\"\r\n",
+        filename
+    ).as_bytes());
+    body.extend_from_slice(format!("Content-Type: {}\r\n\r\n", content_type).as_bytes());
+    body.extend_from_slice(&file_content);
+    body.extend_from_slice(format!("\r\n--{}--\r\n", boundary).as_bytes());
+    
+    // Send request
+    let response = ureq::post(&url)
+        .set("Content-Type", &format!("multipart/form-data; boundary={}", boundary))
+        .send_bytes(&body)
+        .map_err(|e| format!("HTTP பிழை: {}", e))?;
+    
+    let status = response.status();
+    let response_body = response.into_string()
+        .map_err(|e| format!("பதில் படிக்க இயலவில்லை: {}", e))?;
+    
+    let mut map = std::collections::HashMap::new();
+    map.insert("நிலை".to_string(), Value::Number(status as f64));
+    map.insert("status".to_string(), Value::Number(status as f64));
+    map.insert("உடல்".to_string(), Value::String(response_body.clone()));
+    map.insert("body".to_string(), Value::String(response_body));
+    map.insert("கோப்பு".to_string(), Value::String(filename.clone()));
+    map.insert("filename".to_string(), Value::String(filename));
+    
+    Ok(Value::Dict(Rc::new(RefCell::new(map))))
+}
+
+/// Flexible HTTP request with custom headers
+/// Usage: http_request({"url": "...", "method": "GET|POST|PUT|DELETE", "headers": {...}, "body": "..."})
+fn builtin_http_request(args: &[Value]) -> Result<Value, String> {
+    let config = match args.first() {
+        Some(Value::Dict(d)) => d.borrow(),
+        Some(v) => return Err(format!("'{}' வகை config ஆக பயன்படுத்த இயலாது - dictionary தேவை", v.type_name())),
+        None => return Err("வலை_கோரிக்கை() config dictionary தேவை".to_string()),
+    };
+    
+    // Get URL (required)
+    let url = match config.get("url") {
+        Some(Value::String(s)) => s.clone(),
+        _ => return Err("வலை_கோரிக்கை() 'url' தேவை".to_string()),
+    };
+    
+    // Get method (default: GET)
+    let method = match config.get("method") {
+        Some(Value::String(s)) => s.to_uppercase(),
+        _ => "GET".to_string(),
+    };
+    
+    // Get body (optional)
+    let body = match config.get("body") {
+        Some(Value::String(s)) => Some(s.clone()),
+        Some(Value::Dict(d)) => {
+            let d = d.borrow();
+            let pairs: Vec<String> = d.iter()
+                .map(|(k, v)| format!("\"{}\": {}", k, value_to_json(v)))
+                .collect();
+            Some(format!("{{{}}}", pairs.join(", ")))
+        }
+        _ => None,
+    };
+    
+    // Get headers (optional)
+    let headers: Vec<(String, String)> = match config.get("headers") {
+        Some(Value::Dict(d)) => {
+            d.borrow().iter()
+                .filter_map(|(k, v)| {
+                    if let Value::String(val) = v {
+                        Some((k.clone(), val.clone()))
+                    } else {
+                        None
+                    }
+                })
+                .collect()
+        }
+        _ => Vec::new(),
+    };
+    
+    // Build request
+    let mut request = match method.as_str() {
+        "GET" => ureq::get(&url),
+        "POST" => ureq::post(&url),
+        "PUT" => ureq::put(&url),
+        "DELETE" => ureq::delete(&url),
+        "PATCH" => ureq::patch(&url),
+        "HEAD" => ureq::head(&url),
+        _ => return Err(format!("தெரியாத HTTP method: {}", method)),
+    };
+    
+    // Add headers
+    for (key, value) in &headers {
+        request = request.set(key, value);
+    }
+    
+    // Send request
+    let response = if let Some(body_content) = body {
+        request.send_string(&body_content)
+    } else {
+        request.call()
+    }.map_err(|e| format!("HTTP பிழை: {}", e))?;
+    
+    let status = response.status();
+    let response_body = response.into_string()
+        .map_err(|e| format!("பதில் படிக்க இயலவில்லை: {}", e))?;
+    let mut map = std::collections::HashMap::new();
+    map.insert("நிலை".to_string(), Value::Number(status as f64));
+    map.insert("status".to_string(), Value::Number(status as f64));
+    map.insert("உடல்".to_string(), Value::String(response_body.clone()));
+    map.insert("body".to_string(), Value::String(response_body));
+    
+    Ok(Value::Dict(Rc::new(RefCell::new(map))))
+}
+
+// ============= WebSocket Module =============
+
+/// Connect to a WebSocket server
+fn builtin_ws_connect(args: &[Value]) -> Result<Value, String> {
+    let url = match args.first() {
+        Some(Value::String(s)) => s.clone(),
+        Some(v) => return Err(format!("'{}' வகை URL ஆக பயன்படுத்த இயலாது", v.type_name())),
+        None => return Err("சாக்கெட்_இணை() URL தேவை".to_string()),
+    };
+    
+    // Connect to WebSocket
+    let (socket, response) = connect(&url)
+        .map_err(|e| format!("WebSocket இணைப்பு பிழை: {}", e))?;
+    
+    // Generate connection ID
+    let conn_id = {
+        let mut counter = WS_COUNTER.lock().map_err(|_| "Lock error")?;
+        *counter += 1;
+        *counter
+    };
+    
+    // Store connection
+    {
+        let mut connections = WS_CONNECTIONS.lock().map_err(|_| "Lock error")?;
+        connections.insert(conn_id, socket);
+    }
+    
+    // Return connection info
+    let mut map = std::collections::HashMap::new();
+    map.insert("id".to_string(), Value::Number(conn_id as f64));
+    map.insert("அடையாளம்".to_string(), Value::Number(conn_id as f64));
+    map.insert("status".to_string(), Value::Number(response.status().as_u16() as f64));
+    map.insert("நிலை".to_string(), Value::Number(response.status().as_u16() as f64));
+    map.insert("connected".to_string(), Value::Boolean(true));
+    map.insert("இணைந்தது".to_string(), Value::Boolean(true));
+    
+    Ok(Value::Dict(Rc::new(RefCell::new(map))))
+}
+
+/// Send a message through WebSocket
+fn builtin_ws_send(args: &[Value]) -> Result<Value, String> {
+    let conn_id = match args.first() {
+        Some(Value::Number(n)) => *n as u64,
+        Some(Value::Dict(d)) => {
+            match d.borrow().get("id") {
+                Some(Value::Number(n)) => *n as u64,
+                _ => return Err("connection dictionary 'id' தேவை".to_string()),
+            }
+        }
+        Some(v) => return Err(format!("'{}' வகை connection ஆக பயன்படுத்த இயலாது", v.type_name())),
+        None => return Err("சாக்கெட்_அனுப்பு() connection தேவை".to_string()),
+    };
+    
+    let message = match args.get(1) {
+        Some(Value::String(s)) => s.clone(),
+        Some(v) => return Err(format!("'{}' வகை செய்தியாக பயன்படுத்த இயலாது", v.type_name())),
+        None => return Err("சாக்கெட்_அனுப்பு() செய்தி தேவை".to_string()),
+    };
+    
+    // Send message
+    {
+        let mut connections = WS_CONNECTIONS.lock().map_err(|_| "Lock error")?;
+        if let Some(socket) = connections.get_mut(&conn_id) {
+            socket.send(Message::Text(message))
+                .map_err(|e| format!("WebSocket அனுப்பு பிழை: {}", e))?;
+        } else {
+            return Err(format!("WebSocket connection {} கிடைக்கவில்லை", conn_id));
+        }
+    }
+    
+    Ok(Value::Boolean(true))
+}
+
+/// Receive a message from WebSocket
+fn builtin_ws_receive(args: &[Value]) -> Result<Value, String> {
+    let conn_id = match args.first() {
+        Some(Value::Number(n)) => *n as u64,
+        Some(Value::Dict(d)) => {
+            match d.borrow().get("id") {
+                Some(Value::Number(n)) => *n as u64,
+                _ => return Err("connection dictionary 'id' தேவை".to_string()),
+            }
+        }
+        Some(v) => return Err(format!("'{}' வகை connection ஆக பயன்படுத்த இயலாது", v.type_name())),
+        None => return Err("சாக்கெட்_படி() connection தேவை".to_string()),
+    };
+    
+    // Receive message
+    let message = {
+        let mut connections = WS_CONNECTIONS.lock().map_err(|_| "Lock error")?;
+        if let Some(socket) = connections.get_mut(&conn_id) {
+            match socket.read() {
+                Ok(msg) => match msg {
+                    Message::Text(text) => Some(Value::String(text)),
+                    Message::Binary(data) => Some(Value::String(format!("[binary: {} bytes]", data.len()))),
+                    Message::Ping(_) | Message::Pong(_) => Some(Value::Null),
+                    Message::Close(_) => {
+                        return Ok(Value::Dict(Rc::new(RefCell::new({
+                            let mut map = std::collections::HashMap::new();
+                            map.insert("closed".to_string(), Value::Boolean(true));
+                            map.insert("மூடப்பட்டது".to_string(), Value::Boolean(true));
+                            map
+                        }))));
+                    }
+                    _ => Some(Value::Null),
+                },
+                Err(e) => return Err(format!("WebSocket படிக்க பிழை: {}", e)),
+            }
+        } else {
+            return Err(format!("WebSocket connection {} கிடைக்கவில்லை", conn_id));
+        }
+    };
+    
+    Ok(message.unwrap_or(Value::Null))
+}
+
+/// Close a WebSocket connection
+fn builtin_ws_close(args: &[Value]) -> Result<Value, String> {
+    let conn_id = match args.first() {
+        Some(Value::Number(n)) => *n as u64,
+        Some(Value::Dict(d)) => {
+            match d.borrow().get("id") {
+                Some(Value::Number(n)) => *n as u64,
+                _ => return Err("connection dictionary 'id' தேவை".to_string()),
+            }
+        }
+        Some(v) => return Err(format!("'{}' வகை connection ஆக பயன்படுத்த இயலாது", v.type_name())),
+        None => return Err("சாக்கெட்_மூடு() connection தேவை".to_string()),
+    };
+    
+    // Close and remove connection
+    {
+        let mut connections = WS_CONNECTIONS.lock().map_err(|_| "Lock error")?;
+        if let Some(mut socket) = connections.remove(&conn_id) {
+            let _ = socket.close(None);
+        } else {
+            return Err(format!("WebSocket connection {} கிடைக்கவில்லை", conn_id));
+        }
+    }
+    
+    Ok(Value::Boolean(true))
+}
+
+/// Convert Value to JSON string representation
+fn value_to_json(value: &Value) -> String {
+    match value {
+        Value::Number(n) => n.to_string(),
+        Value::String(s) => format!("\"{}\"", s.replace('\"', "\\\"")),
+        Value::Boolean(b) => b.to_string(),
+        Value::Null => "null".to_string(),
+        Value::List(l) => {
+            let items: Vec<String> = l.borrow().iter().map(value_to_json).collect();
+            format!("[{}]", items.join(", "))
+        }
+        Value::Dict(d) => {
+            let pairs: Vec<String> = d.borrow().iter()
+                .map(|(k, v)| format!("\"{}\": {}", k, value_to_json(v)))
+                .collect();
+            format!("{{{}}}", pairs.join(", "))
+        }
+        _ => "null".to_string(),
+    }
+}
+
+/// Parse JSON string into Value
+fn builtin_json_parse(args: &[Value]) -> Result<Value, String> {
+    match args.first() {
+        Some(Value::String(json_str)) => {
+            parse_json_value(json_str.trim())
+        }
+        Some(v) => Err(format!("'{}' வகை JSON ஆக பகுக்க இயலாது", v.type_name())),
+        None => Err("json_படி() JSON சரம் தேவை".to_string()),
+    }
+}
+
+/// Simple JSON parser
+fn parse_json_value(s: &str) -> Result<Value, String> {
+    let s = s.trim();
+    
+    if s.is_empty() {
+        return Err("வெற்று JSON".to_string());
+    }
+    
+    // Null
+    if s == "null" {
+        return Ok(Value::Null);
+    }
+    
+    // Boolean
+    if s == "true" {
+        return Ok(Value::Boolean(true));
+    }
+    if s == "false" {
+        return Ok(Value::Boolean(false));
+    }
+    
+    // Number
+    if let Ok(n) = s.parse::<f64>() {
+        return Ok(Value::Number(n));
+    }
+    
+    // String
+    if s.starts_with('"') && s.ends_with('"') && s.len() >= 2 {
+        let inner = &s[1..s.len()-1];
+        return Ok(Value::String(inner.replace("\\\"", "\"").replace("\\n", "\n")));
+    }
+    
+    // Array
+    if s.starts_with('[') && s.ends_with(']') {
+        let inner = &s[1..s.len()-1].trim();
+        if inner.is_empty() {
+            return Ok(Value::List(Rc::new(RefCell::new(Vec::new()))));
+        }
+        
+        let elements = split_json_array(inner)?;
+        let mut list = Vec::new();
+        for elem in elements {
+            list.push(parse_json_value(&elem)?);
+        }
+        return Ok(Value::List(Rc::new(RefCell::new(list))));
+    }
+    
+    // Object
+    if s.starts_with('{') && s.ends_with('}') {
+        let inner = &s[1..s.len()-1].trim();
+        if inner.is_empty() {
+            return Ok(Value::Dict(Rc::new(RefCell::new(std::collections::HashMap::new()))));
+        }
+        
+        let pairs = split_json_object(inner)?;
+        let mut map = std::collections::HashMap::new();
+        for (key, value) in pairs {
+            map.insert(key, parse_json_value(&value)?);
+        }
+        return Ok(Value::Dict(Rc::new(RefCell::new(map))));
+    }
+    
+    Err(format!("தவறான JSON: {}", s))
+}
+
+/// Split JSON array elements
+fn split_json_array(s: &str) -> Result<Vec<String>, String> {
+    let mut elements = Vec::new();
+    let mut current = String::new();
+    let mut depth = 0;
+    let mut in_string = false;
+    let mut escape = false;
+    
+    for c in s.chars() {
+        if escape {
+            current.push(c);
+            escape = false;
+            continue;
+        }
+        
+        if c == '\\' && in_string {
+            current.push(c);
+            escape = true;
+            continue;
+        }
+        
+        if c == '"' {
+            in_string = !in_string;
+            current.push(c);
+            continue;
+        }
+        
+        if !in_string {
+            match c {
+                '[' | '{' => {
+                    depth += 1;
+                    current.push(c);
+                }
+                ']' | '}' => {
+                    depth -= 1;
+                    current.push(c);
+                }
+                ',' if depth == 0 => {
+                    elements.push(current.trim().to_string());
+                    current.clear();
+                }
+                _ => current.push(c),
+            }
+        } else {
+            current.push(c);
+        }
+    }
+    
+    if !current.trim().is_empty() {
+        elements.push(current.trim().to_string());
+    }
+    
+    Ok(elements)
+}
+
+/// Split JSON object into key-value pairs
+fn split_json_object(s: &str) -> Result<Vec<(String, String)>, String> {
+    let elements = split_json_array(s)?;
+    let mut pairs = Vec::new();
+    
+    for elem in elements {
+        if let Some(colon_pos) = find_colon_outside_string(&elem) {
+            let key = elem[..colon_pos].trim();
+            let value = elem[colon_pos + 1..].trim();
+            
+            // Remove quotes from key
+            let key = if key.starts_with('"') && key.ends_with('"') && key.len() >= 2 {
+                key[1..key.len()-1].to_string()
+            } else {
+                key.to_string()
+            };
+            
+            pairs.push((key, value.to_string()));
+        }
+    }
+    
+    Ok(pairs)
+}
+
+/// Find colon position outside of strings
+fn find_colon_outside_string(s: &str) -> Option<usize> {
+    let mut in_string = false;
+    let mut escape = false;
+    
+    for (i, c) in s.chars().enumerate() {
+        if escape {
+            escape = false;
+            continue;
+        }
+        if c == '\\' && in_string {
+            escape = true;
+            continue;
+        }
+        if c == '"' {
+            in_string = !in_string;
+            continue;
+        }
+        if c == ':' && !in_string {
+            return Some(i);
+        }
+    }
+    None
 }

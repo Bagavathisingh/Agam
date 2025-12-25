@@ -63,14 +63,71 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - minor typos
 - minor bugs fixed
 
+---
+
+## [0.1.2] - 2025-12-25
+
+### Fixed - சரிசெய்தவை
+- **Input function** - `உள்ளீடு()` / `input()` now works correctly in expressions
+  - Parser now properly handles the `Ulleedu` token as a callable identifier
+
+### Added - சேர்க்கப்பட்டவை
+
+#### REPL Improvements - REPL மேம்பாடுகள்
+- **Line numbers** - Each prompt shows `[n] >>>` with line count
+- **Expression results** - Expression values now displayed with `=> result`
+- **Clear screen** - `clear()` / `அழி()` / `cls` to clear the terminal
+- **Command history** - `history()` / `வரலாறு()` to view previous commands
+- **Simpler commands** - `exit`, `help`, `?` work without parentheses
+- **Better multi-line** - Improved block detection with tab support
+- **EOF handling** - Graceful exit on Ctrl+D with farewell message
+- **Enhanced help** - Comprehensive help with examples in a nice box format
+
+#### Lambda/Anonymous Functions - செயலி செயல்கள்
+- **Tamil syntax** - `செயலி(x, y): x + y`
+- **English syntax** - `lambda(x, y): x + y`
+- **Arrow syntax** - `(x, y) => x + y`
+- Lambdas can be assigned to variables and called like regular functions
+- Support for closures (captures enclosing scope)
+
+#### String Interpolation - சரம் இணைப்பு
+- **F-String syntax** - `f"Hello {name}!"` or `f"வணக்கம் {பெயர்}!"`
+- Embed any expression inside `{}` braces
+- Supports variable references, function calls, and complex expressions
+- Example: `f"2 + 3 = {2 + 3}"` → `"2 + 3 = 5"`
+- Escape braces with `{{` and `}}`
+
+#### Time Module - நேரம் தொகுதி
+- `நேரம்()` / `time()` - Get Unix timestamp in seconds
+- `தூக்கம்(n)` / `sleep(n)` - Pause execution for n seconds
+- `தேதி()` / `date()` - Get formatted date string (YYYY-MM-DD HH:MM:SS)
+- `நாள்()` / `now()` - Get current time as dictionary with components:
+  - `year`/`ஆண்டு`, `month`/`மாதம்`, `day`/`நாள்`
+  - `hour`/`மணி`, `minute`/`நிமிடம்`, `second`/`வினாடி`
+
+#### HTTP & JSON Module - வலை தொகுதி
+- `வலை_படி(url)` / `http_get(url)` - HTTP GET request, returns `{status, body}`
+- `வலை_அனுப்பு(url, data)` / `http_post(url, data)` - HTTP POST request
+- `வலை_புதுப்பி(url, data)` / `http_put(url, data)` - HTTP PUT request
+- `வலை_நீக்கு(url)` / `http_delete(url)` - HTTP DELETE request
+- `கோப்பு_பதிவேற்று(url, path)` / `file_upload(url, path)` - Upload file via multipart/form-data
+- `வலை_கோரிக்கை(config)` / `http_request(config)` - Flexible HTTP with custom headers
+  - Config: `{url, method, headers: {...}, body}`
+  - Supports GET, POST, PUT, DELETE, PATCH, HEAD methods
+- `json_படி(str)` / `json_parse(str)` - Parse JSON string into Agam value
+- Supports nested objects, arrays, strings, numbers, booleans, null
+
+#### WebSocket Module - சாக்கெட் தொகுதி
+- `சாக்கெட்_இணை(url)` / `ws_connect(url)` - Connect to WebSocket server, returns `{id, status, connected}`
+- `சாக்கெட்_அனுப்பு(conn, msg)` / `ws_send(conn, msg)` - Send message through WebSocket
+- `சாக்கெட்_படி(conn)` / `ws_receive(conn)` - Receive message (blocking)
+- `சாக்கெட்_மூடு(conn)` / `ws_close(conn)` - Close WebSocket connection
 
 ## Future Plans - எதிர்கால திட்டங்கள்
 
 ### [0.2.0] - Planned
-- Lambda/anonymous functions
-- String interpolation
-- Standard library modules (time, http)
-- REPL improvements
+- Async/await
+- More string methods
 
 ### [0.3.0] - Planned
 - Bytecode compilation

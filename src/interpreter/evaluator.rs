@@ -384,6 +384,22 @@ impl Evaluator {
         match expr {
             Expression::Number(n) => Ok(Value::Number(*n)),
             Expression::String(s) => Ok(Value::String(s.clone())),
+            
+            // Interpolated f-string: f"Hello {name}!"
+            Expression::FString { parts } => {
+                let mut result = String::new();
+                for part in parts {
+                    match part {
+                        FStringPart::Literal(s) => result.push_str(s),
+                        FStringPart::Expression(expr) => {
+                            let value = self.evaluate(expr)?;
+                            result.push_str(&value.to_string());
+                        }
+                    }
+                }
+                Ok(Value::String(result))
+            }
+            
             Expression::Boolean(b) => Ok(Value::Boolean(*b)),
             Expression::Null => Ok(Value::Null),
 
@@ -680,6 +696,22 @@ impl Evaluator {
                         format!("'{}' வகையில் புலம் ஒதுக்க இயலாது", obj.type_name()),
                     )),
                 }
+            }
+
+            // Lambda/anonymous function: செயலி(x): x * 2 or (x) => x * 2
+            Expression::Lambda { params, body } => {
+                // Convert lambda to a function value
+                // We wrap the body expression in a return statement
+                let body_stmt = vec![Statement::Return(Some((**body).clone()))];
+                
+                let func = AgamFunction::new(
+                    "<lambda>".to_string(),
+                    params.clone(),
+                    body_stmt,
+                    Rc::clone(&self.environment),
+                );
+                
+                Ok(Value::Function(func))
             }
         }
     }

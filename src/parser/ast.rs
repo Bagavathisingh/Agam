@@ -103,6 +103,15 @@ pub enum Pattern {
     EnumVariant(String, String), // (enum_name, variant_name)
 }
 
+/// Part of an interpolated f-string
+#[derive(Debug, Clone)]
+pub enum FStringPart {
+    /// Literal string part
+    Literal(String),
+    /// Expression to be evaluated: {expr}
+    Expression(Box<Expression>),
+}
+
 /// Expression types
 #[derive(Debug, Clone)]
 pub enum Expression {
@@ -110,6 +119,10 @@ pub enum Expression {
     Number(f64),
     /// String literal
     String(String),
+    /// Interpolated string: f"Hello {name}!"
+    FString {
+        parts: Vec<FStringPart>,
+    },
     /// Boolean literal
     Boolean(bool),
     /// Null literal
@@ -169,6 +182,11 @@ pub enum Expression {
         object: Box<Expression>,
         member: String,
         value: Box<Expression>,
+    },
+    /// Lambda/anonymous function: செயலி(x, y): x + y or (x, y) => x + y
+    Lambda {
+        params: Vec<String>,
+        body: Box<Expression>,
     },
 }
 
