@@ -252,6 +252,53 @@ A function can call itself:
 
 ---
 
+## Lambda Functions (செயலி)
+
+As of version 0.1.2, Agam supports anonymous functions (lambda functions). These are useful for passing functions as arguments or defining short helper functions.
+
+### Syntax
+
+There are three ways to define a lambda function:
+
+1. **Tamil Keyword**: `செயலி(params): expr`
+2. **English Keyword**: `lambda(params): expr`
+3. **Arrow Syntax**: `(params) => expr`
+
+### Examples
+
+```agam
+# Define square function
+மாறி sq = செயலி(x): x * x
+அச்சிடு(sq(5))  # Output: 25
+
+# English keyword
+மாறி add = lambda(a, b): a + b
+அச்சிடு(add(10, 20))  # Output: 30
+
+# Arrow syntax
+மாறி hello = (name) => "Hello, " + name
+அச்சிடு(hello("Agam"))  # Output: Hello, Agam
+```
+
+### Passing to Functions
+
+Lambdas are commonly used with higher-order functions:
+
+```agam
+# Custom map function
+செயல் map(list, func):
+    மாறி result = []
+    ஒவ்வொரு item உள்ள list:
+        result = result + [func(item)]
+    திரும்பு result
+
+மாறி numbers = [1, 2, 3]
+மாறி doubled = map(numbers, (x) => x * 2)
+அச்சிடு(doubled)  # Output: [2, 4, 6]
+```
+
+---
+
 ## Summary
 
 | Concept | Syntax |

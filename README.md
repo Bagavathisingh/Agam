@@ -120,6 +120,7 @@ Agam’s goal is to make programming **native, accessible, and powerful** for Ta
 | Tamil           | English  | Purpose       |
 | --------------- | -------- | ------------- |
 | `செயல்`         | `fn`     | Function      |
+| `செயலி`         | `lambda` | Lambda Fn     |
 | `மாறி`          | `let`    | Variable      |
 | `மாறாத`         | `const`  | Constant      |
 | `என்றால்`       | `if`     | Conditional   |
@@ -138,6 +139,35 @@ Agam’s goal is to make programming **native, accessible, and powerful** for Ta
 | `அல்லது`        | `or`     | Logical OR    |
 | `இல்ல`          | `not`    | Logical NOT   |
 
+### New Features (v0.1.2)
+
+#### Lambda Functions
+Agam supports anonymous functions (lambdas) with three syntax styles:
+
+```agam
+# Tamil Keyword
+மாறி double = செயலி(x): x * 2
+
+# English Keyword
+let add = lambda(a, b): a + b
+
+# Arrow Syntax
+மாறி triple = (x) => x * 3
+```
+
+#### String Interpolation (F-Strings)
+Embed expressions directly in strings using `f"..."`:
+
+```agam
+மாறி பெயர் = "குமார்"
+அச்சிடு(f"வணக்கம் {பெயர்}!")  # Output: வணக்கம் குமார்!
+
+# With Expressions
+அச்சிடு(f"2 + 3 = {2 + 3}")   # Output: 2 + 3 = 5
+```
+
+---
+
 ### Advanced Features
 
 | Tamil           | English  | Purpose           |
@@ -150,6 +180,35 @@ Agam’s goal is to make programming **native, accessible, and powerful** for Ta
 | `முயற்சி`       | `try`    | Try block         |
 | `பிடி`          | `catch`  | Catch block       |
 | `வீசு`          | `throw`  | Throw error       |
+
+### Standard Library
+
+#### Time Module
+| Tamil | English | Description |
+|-------|---------|-------------|
+| `நேரம்()` | `time()` | Current timestamp |
+| `தூக்கம்(n)` | `sleep(n)` | Sleep for n seconds |
+| `தேதி()` | `date()` | Current date string |
+| `நாள்()` | `now()` | Current time components |
+
+#### HTTP Module
+| Tamil | English | Description |
+|-------|---------|-------------|
+| `வலை_படி(url)` | `http_get(url)` | GET request |
+| `வலை_அனுப்பு(url, data)` | `http_post(url, data)` | POST request |
+| `வலை_புதுப்பி(url, data)` | `http_put(url, data)` | PUT request |
+| `வலை_நீக்கு(url)` | `http_delete(url)` | DELETE request |
+| `வலை_கோரிக்கை(config)` | `http_request(config)` | Custom request |
+| `கோப்பு_பதிவேற்று(url, path)` | `file_upload(url)` | Upload file |
+| `json_படி(str)` | `json_parse(str)` | Parse JSON |
+
+#### WebSocket Module
+| Tamil | English | Description |
+|-------|---------|-------------|
+| `சாக்கெட்_இணை(url)` | `ws_connect(url)` | Connect to WebSocket |
+| `சாக்கெட்_அனுப்பு(conn, msg)` | `ws_send(conn, msg)` | Send message |
+| `சாக்கெட்_படி(conn)` | `ws_receive(conn)` | Receive message |
+| `சாக்கெட்_மூடு(conn)` | `ws_close(conn)` | Close connection |
 
 ### Built-in Functions
 
@@ -164,7 +223,7 @@ Agam’s goal is to make programming **native, accessible, and powerful** for Ta
 | `படி`          | `read_file` | Read file         |
 | `எழுது`        | `write_file`| Write file        |
 
-> 📚 See the [complete documentation](docs/README.md) for all 33+ built-in functions!
+> 📚 See the [complete documentation](docs/README.md) for all built-in functions!
 
 ---
 

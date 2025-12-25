@@ -39,7 +39,10 @@ pub enum TokenType {
     Viruppam,        // விருப்பம் - enum
     Poruthu,         // பொருத்து - match
     Underscore,      // _ - wildcard
-    Arrow,           // => - match arm arrow
+    Arrow,           // => - match arm arrow / lambda arrow
+    
+    // Lambda/anonymous functions
+    Seyali,          // செயலி - lambda
 
     // Built-in functions
     Achidu,          // அச்சிடு - print
@@ -50,6 +53,7 @@ pub enum TokenType {
     // Literals
     Number(f64),     // Numbers (எண்)
     String(String),  // Strings (சரம்)
+    FString(String), // Interpolated strings: f"Hello {name}!"
     Identifier(String), // Identifiers
 
     // Operators
@@ -116,6 +120,7 @@ impl fmt::Display for TokenType {
             TokenType::Vagai => write!(f, "வகை"),
             TokenType::Number(n) => write!(f, "{}", n),
             TokenType::String(s) => write!(f, "\"{}\"", s),
+            TokenType::FString(s) => write!(f, "f\"{}\"", s),
             TokenType::Identifier(s) => write!(f, "{}", s),
             TokenType::Plus => write!(f, "+"),
             TokenType::Minus => write!(f, "-"),
@@ -146,6 +151,7 @@ impl fmt::Display for TokenType {
             TokenType::Poruthu => write!(f, "பொருத்து"),
             TokenType::Underscore => write!(f, "_"),
             TokenType::Arrow => write!(f, "=>"),
+            TokenType::Seyali => write!(f, "செயலி"),
             TokenType::Eof => write!(f, "EOF"),
         }
     }

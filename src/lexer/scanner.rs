@@ -95,6 +95,10 @@ impl<'a> Scanner<'a> {
         keywords.insert("பொருத்து", TokenType::Poruthu);
         keywords.insert("match", TokenType::Poruthu);
         keywords.insert("_", TokenType::Underscore);
+        
+        // Lambda/anonymous functions
+        keywords.insert("செயலி", TokenType::Seyali);
+        keywords.insert("lambda", TokenType::Seyali);
 
         Scanner {
             source,
@@ -390,6 +394,12 @@ impl<'a> Scanner<'a> {
     }
 
     fn identifier(&mut self, first: char) -> Result<(), AgamError> {
+        // Special case: f" starts an f-string
+        if (first == 'f' || first == 'F') && self.peek() == Some('"') {
+            self.advance(); // consume the "
+            return self.fstring();
+        }
+        
         let mut value = String::from(first);
 
         while let Some(&c) = self.chars.peek() {
@@ -409,6 +419,37 @@ impl<'a> Scanner<'a> {
             .unwrap_or_else(|| TokenType::Identifier(value.clone()));
 
         self.add_token(token_type, value);
+        Ok(())
+    }
+    
+    /// Parse an f-string: f"Hello {name}!"
+    fn fstring(&mut self) -> Result<(), AgamError> {
+        let mut value = String::new();
+        
+        while let Some(&c) = self.chars.peek() {
+            if c == '"' {
+                break;
+            }
+            if c == '\n' {
+                self.line += 1;
+                self.column = 0;
+            }
+            value.push(c);
+            self.advance();
+        }
+
+        if self.is_at_end() {
+            return Err(AgamError::lexer_error(
+                self.line,
+                self.start_column,
+                "முடிவுறாத f-சரம் (Unterminated f-string)".to_string(),
+            ));
+        }
+
+        // Consume closing quote
+        self.advance();
+        
+        self.add_token(TokenType::FString(value.clone()), format!("f\"{}\"", value));
         Ok(())
     }
 
