@@ -4,7 +4,7 @@
 
 set -e
 
-VERSION="0.1.1"
+VERSION="0.1.2"
 INSTALL_DIR="/usr/local/bin"
 agam_HOME="$HOME/.agam"
 
