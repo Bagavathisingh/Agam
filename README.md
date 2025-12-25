@@ -1,45 +1,42 @@
-# அகம் (Agam) — Tamil Programming Language
+<p align="center">
+  <img src="assets/agam-banner.svg" alt="Agam Tamil Programming Language" />
+</p>
 
-![Language](https://img.shields.io/badge/built%20with-Rust-orange)
-![License](https://img.shields.io/badge/license-MIT-green)
-
-**தமிழில் நிரலாக்கம் செய்யுங்கள்!**
-*Program in Tamil.*
-
----
-
-## 🌟 Introduction
-
-**அகம் (Agam)** is a modern, fast, and safe **Tamil-first programming language** designed for real-world usage.
-
-Agam enables developers, students, and educators to write expressive programs **entirely in Tamil**, while enjoying **Python inspired simplicity** and **Rust-powered performance and safety**.
-
-> **Created by:** **Balapriyan B**
-> **Assisted by:** **Claude Sonnet 4.5**
-
-Agam’s goal is to make programming **native, accessible, and powerful** for Tamil-speaking communities.
+<p align="center">
+  <img src="https://img.shields.io/github/v/release/Aruvili/Agam" />
+  <img src="https://img.shields.io/badge/docs-agam.aruvili.com-brightgreen" />
+  <img src="https://img.shields.io/github/license/Aruvili/Agam" />
+  <img src="https://img.shields.io/github/stars/Aruvili/Agam?style=social" />
+</p>
 
 ---
 
-## ✨ Key Highlights
+# 🔥 அகம் (Agam) — Tamil Programming Language
 
-* 🇮🇳 **Tamil-first language** — write programs fully in Tamil
-* 🐍 **Python inspired syntax** — simple, readable, indentation-based
-* ⚡ **High performance** — powered by Rust
-* 🔒 **Memory safe & type secure**
-* 🖥️ **Interactive REPL**
-* 🎓 **Education-ready**
-* 🚀 **Designed for production use**
+> **Program in Tamil. Build for the real world.**
+
+**அகம் (Agam)** is a **modern, fast, and safe Tamil-first programming language** designed for learning, scripting, and future production use.  
+It combines **Python-like simplicity** with **Rust-powered performance and safety**.
 
 ---
 
-## 🚀 Quick Start
+## ✨ Why Agam?
 
-### Hello World
+- 🇮🇳 Write programs **entirely in Tamil**
+- 🐍 Simple, readable, Python-inspired syntax
+- ⚡ High performance (built with Rust)
+- 🔒 Memory-safe and type-secure
+- 🖥️ Interactive REPL
+- 🎓 Perfect for education & beginners
+- 🚀 Built with long-term production goals
+
+---
+
+## 🚀 Quick Example
 
 ```agam
 அச்சிடு("வணக்கம் உலகம்!")
-```
+````
 
 **Output**
 
@@ -120,7 +117,6 @@ Agam’s goal is to make programming **native, accessible, and powerful** for Ta
 | Tamil           | English  | Purpose       |
 | --------------- | -------- | ------------- |
 | `செயல்`         | `fn`     | Function      |
-| `செயலி`         | `lambda` | Lambda Fn     |
 | `மாறி`          | `let`    | Variable      |
 | `மாறாத`         | `const`  | Constant      |
 | `என்றால்`       | `if`     | Conditional   |
@@ -139,35 +135,6 @@ Agam’s goal is to make programming **native, accessible, and powerful** for Ta
 | `அல்லது`        | `or`     | Logical OR    |
 | `இல்ல`          | `not`    | Logical NOT   |
 
-### New Features (v0.1.2)
-
-#### Lambda Functions
-Agam supports anonymous functions (lambdas) with three syntax styles:
-
-```agam
-# Tamil Keyword
-மாறி double = செயலி(x): x * 2
-
-# English Keyword
-let add = lambda(a, b): a + b
-
-# Arrow Syntax
-மாறி triple = (x) => x * 3
-```
-
-#### String Interpolation (F-Strings)
-Embed expressions directly in strings using `f"..."`:
-
-```agam
-மாறி பெயர் = "குமார்"
-அச்சிடு(f"வணக்கம் {பெயர்}!")  # Output: வணக்கம் குமார்!
-
-# With Expressions
-அச்சிடு(f"2 + 3 = {2 + 3}")   # Output: 2 + 3 = 5
-```
-
----
-
 ### Advanced Features
 
 | Tamil           | English  | Purpose           |
@@ -180,35 +147,6 @@ Embed expressions directly in strings using `f"..."`:
 | `முயற்சி`       | `try`    | Try block         |
 | `பிடி`          | `catch`  | Catch block       |
 | `வீசு`          | `throw`  | Throw error       |
-
-### Standard Library
-
-#### Time Module
-| Tamil | English | Description |
-|-------|---------|-------------|
-| `நேரம்()` | `time()` | Current timestamp |
-| `தூக்கம்(n)` | `sleep(n)` | Sleep for n seconds |
-| `தேதி()` | `date()` | Current date string |
-| `நாள்()` | `now()` | Current time components |
-
-#### HTTP Module
-| Tamil | English | Description |
-|-------|---------|-------------|
-| `வலை_படி(url)` | `http_get(url)` | GET request |
-| `வலை_அனுப்பு(url, data)` | `http_post(url, data)` | POST request |
-| `வலை_புதுப்பி(url, data)` | `http_put(url, data)` | PUT request |
-| `வலை_நீக்கு(url)` | `http_delete(url)` | DELETE request |
-| `வலை_கோரிக்கை(config)` | `http_request(config)` | Custom request |
-| `கோப்பு_பதிவேற்று(url, path)` | `file_upload(url)` | Upload file |
-| `json_படி(str)` | `json_parse(str)` | Parse JSON |
-
-#### WebSocket Module
-| Tamil | English | Description |
-|-------|---------|-------------|
-| `சாக்கெட்_இணை(url)` | `ws_connect(url)` | Connect to WebSocket |
-| `சாக்கெட்_அனுப்பு(conn, msg)` | `ws_send(conn, msg)` | Send message |
-| `சாக்கெட்_படி(conn)` | `ws_receive(conn)` | Receive message |
-| `சாக்கெட்_மூடு(conn)` | `ws_close(conn)` | Close connection |
 
 ### Built-in Functions
 
@@ -223,7 +161,7 @@ Embed expressions directly in strings using `f"..."`:
 | `படி`          | `read_file` | Read file         |
 | `எழுது`        | `write_file`| Write file        |
 
-> 📚 See the [complete documentation](docs/README.md) for all built-in functions!
+> 📚 See the [complete documentation](docs/README.md) for all 33+ built-in functions!
 
 ---
 
@@ -235,68 +173,65 @@ Launch the REPL:
 agam
 ```
 
-```
-╔════════════════════════════════════════════╗
-║  அகம் - Agam Programming Language v0.1.0  ║
-║  தமிழில் நிரலாக்கம் செய்யுங்கள்!          ║
-╚════════════════════════════════════════════╝
-
->>> மாறி x = 10
->>> அச்சிடு(x * 2)
-20
->>> வெளியேறு()
-நன்றி! மீண்டும் வருக! 🙏
-```
+No setup. No dependencies. Just run.
 
 ---
 
-## 📦 Installation
+## 📘 Documentation
 
-### Using Prebuilt Binary (Recommended)
+Complete and official documentation is available at:
 
-> [ALL DOWNLOAD LINKS INCLUDED HERE](https://github.com/Aruvili/Agam/releases)
+🌐 **[https://agam.aruvili.com](https://agam.aruvili.com)**
 
-Prebuilt binaries for **Windows, macOS, and Linux** will be available after the first GitHub release.
+Includes:
 
-Users will be able to:
-
-* Download a single executable
-* Run `agam` instantly
-* Use Agam without installing Rust or Cargo
-
----
-
-## 🎯 Use Cases
-
-* Learning programming in Tamil
-* Schools & colleges
-* Beginner-friendly scripting
-* Algorithm learning
-* REPL-based experimentation
-* Community-driven projects
-
+* Getting started
+* Language syntax & keywords
+* Conditions, loops, functions
+* Lambda expressions
+* Standard library
+* REPL usage
+* Examples & FAQs
 
 ---
 
-## 🤝 Community
+## 👨‍💻 Credits
 
-Agam is **open-source and community-driven**.
-Feedback, ideas, and contributions are welcome.
+### 🧠 Language
+
+* **Created by:** [**Balapriyan B**](https://github.com/BalaPriyan)
+* **Assisted by:** Claude Sonnet 4.5
+
+### 🖥️ Tested
+* **Language Tested By**: [**Sriram G**](https://github.com/GGSriram)
+
+### 📘 Documentation
+
+* **Developed by:** [**Bagavathisingh B**](https://github.com/Bagavathisingh)
+* **Hosted at:** [https://agam.aruvili.com](https://agam.aruvili.com)
+
+### 📝 README 
+* **crafted by**: **ChatGPT**
+
+---
+
+## 🤝 Contributing
+
+Agam is **open-source and community-driven** ❤️
+Contributions, ideas, issues, and improvements are always welcome.
+
+⭐ If you like Agam, please **star the repository** — it helps the Tamil developer ecosystem grow.
 
 ---
 
 ## 📜 License
 
-[MIT License](LICENSE).
+MIT License © Aruvili
 
 ---
 
 ### 🇮🇳 **அகம் — தமிழில் நிரலாக்கத்தின் எதிர்காலம்**
 
-Created by **Balapriyan B**
-Assisted by **Claude Sonnet 4.5**
-
-### README.md
-Credits To CHATGPT
+Built with ❤️ for the Tamil developer community
 
 ---
